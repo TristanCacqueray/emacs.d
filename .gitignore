@@ -1,0 +1,9 @@
+/.cask
+/.hive-maint
+/custom.el
+/elpa
+/var
+/init.el*
+/places
+/history
+/projectile-bookmarks.eld
