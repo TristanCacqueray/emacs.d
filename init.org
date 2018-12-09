@@ -1,0 +1,1255 @@
+#+TITLE: Emacs Literate Configuration
+#+AUTHOR: Tristan de Cacqueray
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+#+PROPERTY: header-args:emacs-lisp :comments link
+
+* About
+This is my current configuration for Emacs. I have been using both Vim
+and Emacs for a long time... Vim used to be better because it is light
+and fast, but this is no longer relevant for me. I prefer Emacs because:
+- Evil binding enables keeping Vim muscle memory,
+- Magit provides an efficient git workflow, and
+- Org-mode is great for getting things done.
+
+For the best experience, I would recommend to build an Emacs configuration
+one option at a time and avoid distribution such as Spacemacs.
+
+This configuration is vastly inspired by [[https://github.com/dakra/dmacs][dmacs]] and the [[https://github.com/caisah/emacs.dz][emacs.dz awesome list]].
+
+** Installation
+This config doesn't use ~package.el~ as package management but
+[[https://emacsmirror.net/manual/borg/][borg]] which uses git submodules.
+After first cloning this repository you have to call ~make bootstrap-borg~
+to download the `borg` library and the you can execute ~make bootstrap~
+to tangle this file and initialize all packages.
+After that you can just call ~make~ to tangle and rebuild the packages
+each time you make a change or ~make build-init~ if you only made
+changes to this file.
+
+* Emacs Initialization
+We want to use lexical scoping
+#+BEGIN_SRC emacs-lisp :comments nil
+;;; init.el --- user-init-file                    -*- lexical-binding: t -*-
+#+END_SRC
+
+Show a few messages with timestamps to get a better overview of how fast
+Emacs is loading certain packages.
+#+BEGIN_SRC emacs-lisp
+(defvar before-user-init-time (current-time)
+  "Value of `current-time' when Emacs begins loading `user-init-file'.")
+(message "Loading Emacs...done (%.3fs)"
+  (float-time (time-subtract before-user-init-time before-init-time)))
+#+END_SRC
+
+Show required package that takes more than 1ms to load.
+Remove ":tangle no" to enable.
+TODO: enable this only when interactive and remove tangle no switch
+#+BEGIN_SRC emacs-lisp :tangle no
+(defadvice require (around my-require activate)
+  (let ((start (current-time))
+        res delta)
+    (setq res ad-do-it)
+    (setq delta (float-time (time-since start)))
+    (when (> delta 0.001)
+      (message "Required %s: %s sec" (ad-get-arg 0) delta))
+    res))
+#+END_SRC
+
+We're going to increase the gc-cons-threshold to a very high number to decrease
+the load and compile time.  We'll lower this value significantly after
+initialization has completed. We don't want to keep this value too high or it
+will result in long GC pauses during normal usage.
+#+BEGIN_SRC emacs-lisp
+(setq gc-cons-threshold (* 256 1024 1024))
+#+END_SRC
+
+Temporarily disable file name handlers as it's not needed on initialization
+#+BEGIN_SRC emacs-lisp
+(defvar file-name-handler-alist-old file-name-handler-alist)
+(setq file-name-handler-alist nil)
+#+END_SRC
+
+Increase max number of log messages
+#+BEGIN_SRC emacs-lisp
+(setq message-log-max 16384)
+#+END_SRC
+
+** Set some early UI settings
+Disable Tool and Menubar
+#+BEGIN_SRC emacs-lisp
+;; A weird flickering bug is happening if tool-bar-mode is disabled too early
+;; It is disabled at the very end...
+;; See: https://github.com/emacs-evil/evil/issues/820
+;;(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+#+END_SRC
+
+Set fringe to a small value so we don't have big borders in exwm
+but can still see our diff-hl colors in the fringe
+#+BEGIN_SRC emacs-lisp
+(fringe-mode '(4 . 4))
+#+END_SRC
+
+Disable startup screen and startup echo area message and select the
+scratch buffer by default
+#+BEGIN_SRC emacs-lisp
+(setq-default
+   inhibit-startup-message t
+   inhibit-startup-buffer-menu t
+   inhibit-startup-screen t
+   inhibit-startup-echo-area-message t
+   initial-buffer-choice t
+   initial-scratch-message nil)
+#+END_SRC
+
+** Package Management
+*** Org config tangle
+There is no ~emacs.el~ in this repo. It will automatically created for you
+from this file (~emacs.org~) when you run ~make build-init~.
+
+Don't forget to call ~make~ every time you edit this file.
+If this annoys you, you could simply add an ~after-save-hook~ that
+calls ~make~ every time you save this file.
+
+*** Package Settings
+We use borg for package management and disable ~package.el~.
+
+Since Emacs 27.1 we have to disable package.el in the early init file.
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+(setq package-enable-at-startup nil)
+#+END_SRC
+
+But still leave it here so it's also disabled on machines that don't
+have the latest Emacs from master installed.
+#+BEGIN_SRC emacs-lisp
+(setq package-enable-at-startup nil)
+#+END_SRC
+
+*** Borg
+Initialize borg package management.
+#+BEGIN_SRC emacs-lisp
+(setq user-init-file (or load-file-name buffer-file-name))
+(setq user-emacs-directory (file-name-directory user-init-file))
+(add-to-list 'load-path (expand-file-name "lib/borg" user-emacs-directory))
+(require 'borg)
+(borg-initialize)
+#+END_SRC
+
+Assimilate new packages using the ~borg-clone~ and ~borg-build~ or simply
+the ~borg-assimilate~ command.
+Update version by changing git submodule and running make.
+
+*** Use-Package
+The use-package macro allows you to isolate package configuration in your
+.emacs file in a way that is both performance-oriented and, well, tidy.
+#+BEGIN_SRC emacs-lisp
+(require 'use-package)
+
+;; For the :bind keyword
+(use-package bind-key :defer t)
+
+;; For the :diminish keyword, to replace mode names in modeline
+(use-package diminish :defer t)
+#+END_SRC
+
+*** Epkg
+This package provides access to a local copy of the Emacsmirror package
+database. It provides low-level functions for querying the database and
+a package.el-like user interface for browsing the available packages.
+
+Describe package using the ~epkg-describe-package~ command.
+
+#+BEGIN_SRC emacs-lisp
+(use-package epkg
+  :defer t
+  :init (setq epkg-repository
+              (expand-file-name "var/epkgs/" user-emacs-directory)))
+
+;; Using auto-compile guarantee that Emacs never loads outdated byte code files.
+(use-package auto-compile
+  :demand t
+  :config
+  (auto-compile-on-load-mode)
+  (auto-compile-on-save-mode)
+  (setq auto-compile-display-buffer               t)
+  (setq auto-compile-mode-line-counter            t)
+  (setq auto-compile-source-recreate-deletes-dest t)
+  (setq auto-compile-toggle-deletes-nonlib-dest   t)
+  (setq auto-compile-update-autoloads             t)
+  (add-hook 'auto-compile-inhibit-compile-hook
+            'auto-compile-inhibit-compile-detached-git-head))
+#+END_SRC
+
+* Solarized theme
+Use the solarized dark theme without bolding or text scaling.
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package solarized-theme
+  :defer t
+  :bind (("C-+" . text-scale-increase)
+         ("C--" . text-scale-decrease))
+  :init
+  (setq
+   ;; Put underline below descent for better legibility.
+   x-underline-at-descent-line t
+
+   solarized-use-less-bold t
+
+   ;; Don't use variable-pitch.
+   solarized-use-variable-pitch nil
+
+   ;; Don't use variable scale text.
+   solarized-scale-org-headlines nil
+   solarized-height-minus-1 1.0
+   solarized-height-plus-1 1.0
+   solarized-height-plus-2 1.0
+   solarized-height-plus-3 1.0
+   solarized-height-plus-4 1.0))
+(load-theme 'solarized-dark t)
+#+END_SRC
+
+Use the Inconsolata font and enable font size change.
+#+BEGIN_SRC emacs-lisp :comments nil
+(set-frame-font "Inconsolata 14")
+#+END_SRC
+
+* Personal Information
+Let's set some variables with basic user information.
+Remove ":tangle no" to use inlined identity such as:
+#+BEGIN_SRC emacs-lisp :tangle no
+(setq user-full-name "Tristan Cacqueray"
+      user-mail-address "tristanc@wombatt.eu"
+      mime-edit-pgp-signers '("453BBC30D147881719C9A8E97A457A788345FE5C")
+      calendar-latitude 37.5
+      calendar-longitude 126.9
+      calendar-location-name "Seoul, KR")
+#+END_SRC
+
+Or copy and edit the identity in a separated file:
+#+BEGIN_SRC emacs-lisp
+(load "~/.emacs.d/identity.el" t)
+#+END_SRC
+
+* Change Emacs default config
+Set default settings, use "C-h v" to desribe the variable
+#+BEGIN_SRC emacs-lisp :comments nil
+;; TODO: break this in logical group
+(setq-default
+  ;; Select in primary selection, not clipboard
+  select-enable-primary t
+  select-enable-clipboard nil
+
+  ;; Always follow symlinks
+  vc-follow-symlinks t
+
+  ;; Do not fill sentence ending with two space in paragraphs.el
+  sentence-end-double-space nil
+
+  ;; Scroll one line when cursor moves out of the window
+  scroll-step 1
+  ;; Scroll up to 100 lines to bring back the cursor on screen
+  scroll-conservatively 100
+
+  ;; Do not flash on bell
+  visible-bell nil
+  ring-bell-function 'ignore
+
+  ;; Auto wrap at 80 columns
+  fill-column 80
+
+  ;; Confirm closing emacs
+  confirm-kill-emacs 'y-or-n-p
+
+  ;; Display filepath in window title
+  frame-title-format (list '(buffer-file-name "%f" (dired-directory dired-directory "%b")))
+
+  ;; Don't use tabs to indent, use 4 spaces instead
+  indent-tabs-mode nil
+  tab-width 4
+  ;; TODO: check why was this enabled
+  ;; tab-stop-list (quote (4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120))
+  ;; smart tab behavior - indent or complete
+  tab-always-indent 'complete
+
+  ;; Ensure file ends with newline
+  require-final-newline t
+
+  ;; Paste at cursor position, not at mouse pointer
+  mouse-yank-at-point t
+
+  ;; Activate character folding in searches i.e. searching for 'e' matches 'é'
+  search-default-mode 'char-fold-to-regexp
+
+  ;; Only split vertically on very tall screens
+  split-height-threshold 110
+
+  ;; don't "ping Germany" when typing test.de<TAB>
+  ffap-machine-p-known 'reject
+
+  ;; Always just use left-to-right text
+  ;; This makes Emacs a bit faster for very long lines
+  bidi-display-reordering nil
+
+  ;; Put authinfo.gpg first so new secrets will be stored there by default
+  auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc")
+
+  ;; Increase the 'Limit on number of Lisp variable bindings.
+  ;; mu4e seems to need more sometimes and it can be safely increased.
+  max-specpdl-size 2048
+
+  ;; Do not save backup in projects, keep them in home
+  auto-save-file-name-transforms `((".*" "~/.emacs-saves/" t))
+  backup-directory-alist `((".*" . ,"~/.emacs-saves/"))
+  )
+#+END_SRC
+
+Set some global key binding (TODO: move this to another section?)
+#+BEGIN_SRC emacs-lisp :comments nil
+;; C-x k : don't ask for buffer name
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
+
+;; Ignore korean layout switch
+(global-set-key (kbd "<Hangul_Hanja>") 'ignore)
+
+;; Don't quit Emacs on C-x C-c
+(when (daemonp)
+  (global-set-key (kbd "C-x C-c") 'kill-buffer-and-window))
+#+END_SRC
+
+Enable some global hook (TODO: move this to another section?)
+#+BEGIN_SRC emacs-lisp :comments nil
+;; Delete trailing white spaces on save
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;; Mark scripts executable
+(add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+#+END_SRC
+
+Enable some global mode (TODO: move this to another section?)
+#+BEGIN_SRC emacs-lisp :comments nil
+;; Syntax highligth all the things
+(global-font-lock-mode t)
+
+;; Automatically insert closing parenthesis, brackets, ... TODO: move to prog
+(electric-pair-mode 1)
+
+;; Blink!
+(blink-cursor-mode 1)
+
+;; Enable frame navigation using Shift+arrow TODO: fix org-mode conflict
+(windmove-default-keybindings)
+
+;; Show line and column number
+(line-number-mode 1)
+(column-number-mode 1)
+
+;; Highlight the current line
+(global-hl-line-mode 1)
+
+;; Highlight stuff
+(global-hi-lock-mode 1)
+
+;; Replace some name with pretty symbols like lambda
+(global-prettify-symbols-mode t)
+
+;; Do not truncate lines by default
+(toggle-truncate-lines -1)
+;; Default to utf-8 unix encoding
+(prefer-coding-system 'utf-8-unix)
+;; Accept 'UTF-8' (uppercase) as a valid encoding in the coding header
+(define-coding-system-alias 'UTF-8 'utf-8)
+#+END_SRC
+
+* Configure Emacs builtin packages
+Improved default settings
+** Customs
+Store custom variable set from the GUI to a separate file.
+The file content shall be assimilated in the main configuration if relevant.
+#+BEGIN_SRC emacs-lisp
+(use-package custom
+  :no-require t
+  :config
+  (setq custom-file "~/.emacs.d/custom.el")
+  (when (file-exists-p custom-file)
+    (load custom-file)))
+#+END_SRC
+
+** Dash: A modern list library for Emacs
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package dash
+  :config
+  ;; Syntax highlighting
+  (dash-enable-font-lock))
+#+END_SRC
+
+** Paren: Show matching parenthesis, brackets, ...
+'%' go to the other match
+#+BEGIN_SRC emacs-lisp
+(use-package paren
+  :config
+  (setq show-paren-delay 0.0)
+  (show-paren-mode))
+#+END_SRC
+
+** Man: Man page documentation.
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package man
+  :defer t
+  :config (setq Man-width 80))
+#+END_SRC
+
+** Recentf: Keep a list of recent files.
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package recentf
+  :demand t
+  :config (add-to-list 'recentf-exclude "^/\\(?:ssh\\|su\\|sudo\\)?:"))
+#+END_SRC
+
+** Auto-revert: Revert buffer when file changes on disk
+#+BEGIN_SRC emacs-lisp
+(use-package autorevert
+  :defer 1
+  ;; TODO: check what is this
+  ;;:hook (find-file . auto-revert-mode)
+  :config
+  ;; We only really need auto revert for git files
+  ;; and we use magits `magit-auto-revert-mode' for that
+  ;;; revert buffers automatically when underlying files are changed externally
+  (global-auto-revert-mode nil)
+
+  ;; Turn off auto revert messages
+  (setq auto-revert-verbose nil))
+#+END_SRC
+
+** Epa: EasyPG Assistant
+#+BEGIN_SRC emacs-lisp
+(use-package epa
+  :defer t
+  :config
+  ;; Always replace encrypted text with plain text version
+  (setq epa-replace-original-text t))
+(use-package epa-file
+  :config
+  (epa-file-enable))
+(use-package epg
+  :defer t
+  :config
+  ;; Let Emacs query the passphrase through the minibuffer
+  (setq epg-pinentry-mode 'loopback))
+#+END_SRC
+
+** Saveplace: Remember your location in a file
+#+BEGIN_SRC emacs-lisp
+(use-package saveplace
+  :unless noninteractive
+  :config
+  (setq save-place-file "~/.emacs.d/saveplace")
+  (setq-default save-place t)
+  (save-place-mode))
+#+END_SRC
+
+** Savehist: Keep track of minibuffer history
+#+BEGIN_SRC emacs-lisp
+(use-package savehist
+  :unless noninteractive
+  ;; :defer 1
+  :config
+  ;; (setq savehist-additional-variables '(compile-command regexp-search-ring))
+  (savehist-mode 1))
+#+END_SRC
+
+** Ansi-color
+#+BEGIN_SRC emacs-lisp
+(use-package ansi-color
+  :commands ansi-color-display
+  :hook (compilation-filter . colorize-compilation-buffer))
+#+END_SRC
+
+** Compile: Run compiler
+#+BEGIN_SRC emacs-lisp
+(use-package compile
+  :bind (:map compilation-mode-map
+         ("C-c -" . compilation-add-separator)
+         ("-" . compilation-add-separator)
+         :map comint-mode-map
+         ("C-c -" . compilation-add-separator))
+  :config
+  (defun compilation-add-separator ()
+    "Insert separator in read-only buffer."
+    (interactive)
+    (let ((inhibit-read-only t))
+      (insert "\n------------------------\n\n")))
+
+  ;; Always save before compiling
+  (setq compilation-ask-about-save nil)
+  ;; Just kill old compile processes before starting the new one
+  (setq compilation-always-kill t)
+  ;; Scroll with the compilation output
+  ;; Set to 'first-error to stop scrolling on first error
+  (setq compilation-scroll-output t))
+#+END_SRC
+Comint mode is a package that defines a general command-interpreter-in-a-buffer.
+#+BEGIN_SRC emacs-lisp
+(use-package comint
+  :defer t
+  :config
+  ;; Increase comint buffer size.
+  (setq comint-buffer-maximum-size 8192))
+#+END_SRC
+
+** Subword: CamelCase aware editing operations
+#+BEGIN_SRC emacs-lisp
+(use-package subword
+  :diminish
+  :hook
+  ((python-mode yaml-mode go-mode clojure-mode cider-repl-mode) . subword-mode))
+#+END_SRC
+
+** Shr: Simple html renderer
+#+BEGIN_SRC emacs-lisp
+(use-package shr
+  :defer t
+  :config
+  (setq shr-width 80)
+  (setq shr-external-browser 'eww-browse-url)
+  (setq shr-color-visible-luminance-min 80))
+#+END_SRC
+
+** Makefile
+#+BEGIN_SRC emacs-lisp
+(use-package make-mode
+  ;; Files like `Makefile.docker' are also gnu make
+  :mode (("Makefile" . makefile-gmake-mode)))
+#+END_SRC
+
+** Calendar
+#+BEGIN_SRC emacs-lisp
+(use-package calendar
+  :hook (calendar-today-visible . calendar-mark-today)
+  :config
+  ;; Highlight public holidays
+  (setq calendar-holiday-marker t))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(message "Loading early birds...done (%.3fs)"
+         (float-time (time-subtract (current-time) before-user-init-time)))
+#+END_SRC
+
+* Editor extra packages
+** UI
+*** Nyan cat: Buffer position with a cat
+#+BEGIN_SRC emacs-lisp
+(use-package nyan-mode
+  :config
+  (nyan-mode)
+  )
+#+END_SRC
+
+*** Eldoc: Display help
+#+BEGIN_SRC emacs-lisp
+(use-package eldoc
+  ;; :hook (prog-mode . eldoc-mode)
+  :config
+  ;; Seems to bug with split evil window or something, disabled for now
+  (global-eldoc-mode -1))
+#+END_SRC
+
+*** Hl-todo: Highlight and navigate TODO keywords
+#+BEGIN_SRC emacs-lisp
+(use-package hl-todo
+  :defer 2
+  :config (global-hl-todo-mode))
+#+END_SRC
+
+*** Fill-column-indicator: vertical line at fill-column
+TODO: auto enable on prog mode
+#+BEGIN_SRC emacs-lisp
+(use-package fill-column-indicator
+  :config
+  (setq fci-rule-width 1)
+  (fci-mode))
+#+END_SRC
+
+*** Volatile highlights: visual feedback on some operations like yank,kill,undo
+#+BEGIN_SRC emacs-lisp
+(use-package volatile-highlights
+  :defer 10
+  :config (volatile-highlights-mode t))
+#+END_SRC
+
+*** beacon: Highlight current line/cursor when switching frames
+#+BEGIN_SRC emacs-lisp
+(use-package beacon
+  :defer 5
+  :diminish
+  :config (beacon-mode 1))
+#+END_SRC
+
+*** which-key: Display available keybindings in popup
+which-key displays the key bindings following your currently entered incomplete
+command (a prefix) in a popup. For example, after enabling the minor mode if you
+enter C-x and wait for the default of 1 second the minibuffer will expand with
+all of the available key bindings that follow C-x (or as many as space allows
+given your settings). This includes prefixes like C-x 8 which are shown in a
+different face
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :defer 10
+  :diminish
+  :config (which-key-mode 1))
+#+END_SRC
+
+*** which-func: Show the name of the current function definition in the modeline
+#+BEGIN_SRC emacs-lisp
+(use-package which-func
+  :defer 5
+  :config (which-function-mode 1))
+#+END_SRC
+
+*** Nicer buffer name for buffers with same name
+#+BEGIN_SRC emacs-lisp
+(use-package uniquify
+  :defer 5
+  :config
+  (setq uniquify-ignore-buffers-re "^\\*") ; don't muck with special buffers
+  (setq uniquify-buffer-name-style 'forward)
+  (setq uniquify-separator "/")
+  ; (setq uniquify-buffer-name-style 'forward)
+  ; (setq mode-line-identification "%f")
+  ; (setq sml/shorten-directory nil)
+  ; (setq sml/shorten-modes nil)
+)
+#+END_SRC
+
+*** Highlight indentions
+#+BEGIN_SRC emacs-lisp
+(use-package highlight-indent-guides
+  :diminish
+  :hook ((sass-mode yaml-mode) . highlight-indent-guides-mode))
+#+END_SRC
+
+*** Highlight trailing whitespaces and tabs
+#+BEGIN_SRC emacs-lisp
+(use-package whitespace
+  :diminish
+  :hook (prog-mode . whitespace-mode)
+  :config
+  (setq whitespace-style
+    (quote
+    (face trailing tabs lines empty space-after-tab space-before-tab tab-mark)))
+
+  ;; highlight lines with more than `fill-column' characters
+  ;; TODO: that may be too pedantic, check how to enable only for some mode
+  (setq whitespace-line-column nil))
+#+END_SRC
+
+*** rainbow-delimiters: Different color for each paranthesis level
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+  :commands rainbow-delimiters-mode
+  :hook ((emacs-lisp-mode lisp-mode hy-mode clojure-mode cider-repl-mode) . rainbow-delimiters-mode))
+#+END_SRC
+
+** Editor
+*** Undo-Tree: undo history done right
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+  :diminish
+  :config
+  (setq undo-tree-visualizer-timestamps t)
+  (setq undo-tree-visualizer-diff t)
+  (global-undo-tree-mode)
+)
+#+END_SRC
+
+*** Automatically remove trailing whitespace (only if I put them there)
+TODO pick this or the delete-trailing-whitespace save-hook
+#+BEGIN_SRC emacs-lisp
+(use-package ws-butler
+  :diminish
+  :hook ((text-mode prog-mode) . ws-butler-mode)
+  :config (setq ws-butler-keep-whitespace-before-point nil))
+#+END_SRC
+
+*** Simple clip: manually manage clipboard
+Use C-<insert> and Shift-<insert> to copy and paste the clipboard.
+Use mouse and middle-mouse to copy and paste the primary clipboard.
+#+BEGIN_SRC emacs-lisp
+(use-package simpleclip
+  :config
+  (simpleclip-mode 1))
+#+END_SRC
+
+*** Cycle outline and code visibility
+These are minor modes to selectively hide/show code and comment blocks
+#+BEGIN_SRC emacs-lisp
+(use-package hideshow
+  :diminish
+  :hook (prog-mode  . hs-minor-mode))
+
+(use-package outline
+  :diminish
+  :hook ((prog-mode message-mode markdown-mode) . outline-minor-mode))
+
+(use-package bicycle
+  :diminish
+  :after outline
+  :bind (:map outline-minor-mode-map
+         ([C-tab] . bicycle-cycle)
+         ([backtab] . bicycle-cycle-global)))
+#+END_SRC
+
+*** Company: Auto completion
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :disabled
+  :diminish
+  :config
+  ;;(setq company-idle-delay 0.1)
+  ;;(setq company-tooltip-limit 10)
+  ;;(setq company-minimum-prefix-length 2)
+  ;;(global-company-mode 1)
+
+  ;;(use-package company-quickhelp
+  ;;  :config (company-quickhelp-mode 1))
+  ;;  )
+  )
+#+END_SRC
+
+*** Helpful: A better help buffer
+Helpful is a replacement for ~*help*~ buffers that provides much more contextual information.
+#+BEGIN_SRC emacs-lisp
+(use-package helpful
+  :bind (("C-h f" . helpful-function)
+         ("C-h v" . helpful-variable)
+         ("C-h s" . helpful-symbol)
+         ("C-h k" . helpful-key)))
+#+END_SRC
+
+** Evil: vim mode and bindings
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package evil
+  :config
+  (progn
+    ;; stop messing with clipboard please
+    (evil-define-operator evil-destroy (beg end type register yank-handler)
+      (evil-delete beg end type ?_ yank-handler))
+    (evil-define-operator evil-destroy-replace (beg end type register yank-handler)
+      (evil-destroy beg end type register yank-handler)
+      (evil-paste-before 1 register))
+
+    ;; Make evil undo only one char at a time
+    (advice-add 'undo-auto--last-boundary-amalgamating-number
+      :override #'ignore)
+    (setq evil-want-fine-undo t)
+
+    ;; TODO: check what is this :)
+    (add-hook 'with-editor-mode-hook 'evil-insert-state)
+    ;; Activate evil
+    (evil-mode +1)
+  )
+)
+#+END_SRC
+
+Enable Vim command such as ":vsp"
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package evil-leader
+  :after evil
+  :config
+  (global-evil-leader-mode))
+#+END_SRC
+
+** Ivy
+*** Smex: fuzzy matching for M-x
+#+BEGIN_SRC emacs-lisp
+(use-package smex
+  :defer t)
+#+END_SRC
+
+*** Counsel
+#+BEGIN_SRC emacs-lisp
+(use-package counsel
+  :diminish
+  :bind (("C-x C-f" . counsel-find-file)
+         ("M-y"     . counsel-yank-pop)
+         ("M-i"     . counsel-imenu)
+         ("M-x"     . counsel-M-x))
+  :config
+  ;; Hide pyc and elc files by default from `counsel-find-file'
+  (setq counsel-find-file-ignore-regexp "\\.\\(pyc\\|elc\\)\\'")
+  ;; Add action to open file literally
+  ;; This makes opening of files with minified js or sql dumps possible.
+  (ivy-add-actions 'counsel-find-file
+                   `(("l" find-file-literally "Open literally")))
+  (counsel-mode 1))
+#+END_SRC
+
+*** Swiper: Search with ivy
+Replace evil search function "/" by swiper
+#+BEGIN_SRC emacs-lisp
+(use-package swiper
+  :config
+  (define-key evil-normal-state-map "/" 'swiper))
+#+END_SRC
+
+*** Ivy: Incremental completYon
+#+BEGIN_SRC emacs-lisp
+;; colir is a color blending library
+(use-package colir)
+(use-package ivy
+  :diminish
+  :config
+  (setq
+    ;; Extend searching to bookmarks and recentf
+    ivy-use-virtual-buffers t
+    ;; does not count candidates
+    ivy-count-format ""
+    ;; only show 18 candidates
+    ivy-height 18
+    ;; no regexp by default
+    ivy-initial-inputs-alist nil
+    ;; Don't quit ivy when pressing backspace on already empty input
+    ivy-on-del-error-function nil
+    ;; allow out of order inputs
+    ivy-re-builders-alist '((t   . ivy--regex-ignore-order))
+    ;; Show full path for virtual buffers
+    ivy-virtual-abbreviate 'full
+    ;; Press C-p when you're on the first candidate to select your input
+    ivy-use-selectable-prompt t)
+  (ivy-mode 1))
+#+END_SRC
+
+** Magit
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package magit
+  :defer t
+  :bind (("C-x g"   . magit-status)
+         ("C-x M-g" . magit-dispatch-popup))
+  :config
+  (setq magit-push-always-verify nil)
+  (magit-add-section-hook 'magit-status-sections-hook
+                          'magit-insert-modules
+                          'magit-insert-stashes
+                          'append))
+#+END_SRC
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package diff-hl
+  :config
+  (setq diff-hl-draw-borders nil)
+  (global-diff-hl-mode)
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh t))
+#+END_SRC
+
+** Project Management
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :defer t
+  :bind-keymap (("s-p"   . projectile-command-map)
+                ("C-c p" . projectile-command-map))
+  :init
+  ;; Allow all file-local values for project root
+  (put 'projectile-project-root 'safe-local-variable 'stringp)
+  :config
+  ;; cache projectile project files
+  ;; projectile-find-files will be much faster for large projects.
+  ;; C-u C-c p f to clear cache before search.
+  (setq-default
+    ;; Don't show "Projectile" as liter when not in a project
+    projectile-mode-line-prefix ""
+    ;; Cache management
+    projectile-file-exists-local-cache-expire 30
+    projectile-enable-caching t
+    ;; Use ivy
+    projectile-completion-system 'ivy
+    ;; My ignore lists
+    projectile-globally-ignored-file-suffixes
+      '("pyc"
+        "png"
+        "jpg"
+        "gif"
+        "zip"
+        "Trash"
+        "swp"
+        "swo"
+        "DS_Store"
+        "swn"
+        "ico"
+        "o"
+        "elc"
+        "a"
+        "so"
+        "exe"
+        "egg-info"
+        "egg"
+        "dmg")
+    projectile-globally-ignored-directories
+      '(".tmp"
+        ".venv"
+        ".pytest_cache"
+        ".eggs"
+        ".coverage"
+        ".git"
+        ".hg"
+        ".idea"
+        ".flsckout"
+        ".bzr"
+        "_darcs"
+        ".tox"
+        ".svn"
+        ".egg"
+        ".egg-info"
+        ".sass-cache"
+        "*.egg-info"
+        ".mypy_cache"
+        "logreduce/server/web"
+        "pagure/static"
+        "pagure/themes"
+        "__pycache__"
+        ".webassets-cache"
+        "node_modules"
+        "venv"
+        "elpa"
+        ".stack-work"))
+  (projectile-mode))
+#+END_SRC
+
+** Dired
+#+BEGIN_SRC emacs-lisp
+(use-package dired
+  :bind (("C-x d" . dired)
+         :map dired-mode-map
+         ("M-RET" . emms-play-dired)
+         ("e" . dired-ediff-files)
+         ("C-c C-e" . dired-toggle-read-only))
+  :config
+  ;; always delete and copy recursively
+  (setq dired-recursive-deletes 'always)
+  (setq dired-recursive-copies 'always)
+)
+(use-package dired-rainbow
+  :after dired
+  :config
+  (dired-rainbow-define html "#4e9a06" ("htm" "html" "xhtml"))
+  (dired-rainbow-define xml "#b4fa70" ("xml" "xsd" "xsl" "xslt" "wsdl"))
+
+  (dired-rainbow-define document font-lock-function-name-face ("doc" "docx" "odt" "pdb" "pdf" "ps" "rtf" "djvu" "epub"))
+  (dired-rainbow-define excel "#3465a4" ("xlsx"))
+  ;; FIXME: my-dired-media-files-extensions not defined?
+  ;;(dired-rainbow-define media "#ce5c00" my-dired-media-files-extensions)
+  (dired-rainbow-define image "#ff4b4b" ("jpg" "png" "jpeg" "gif"))
+
+  (dired-rainbow-define log "#c17d11" ("log"))
+  (dired-rainbow-define sourcefile "#fcaf3e" ("py" "c" "cc" "cpp" "h" "java" "pl" "rb" "R"
+                                              "php" "go" "rust" "js" "ts" "hs"))
+
+  (dired-rainbow-define executable "#8cc4ff" ("exe" "msi"))
+  (dired-rainbow-define compressed "#ad7fa8" ("zip" "bz2" "tgz" "txz" "gz" "xz" "z" "Z" "jar"
+                                              "war" "ear" "rar" "sar" "xpi" "apk" "xz" "tar"))
+  (dired-rainbow-define packaged "#e6a8df" ("deb" "rpm"))
+  (dired-rainbow-define encrypted "LightBlue" ("gpg" "pgp"))
+
+  (dired-rainbow-define-chmod executable-unix "Green" "-.*x.*"))
+
+#+END_SRC
+
+* Org mode
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package org
+  :bind (("C-c a"   . org-agenda)
+         ("C-c c"   . org-capture))
+  :config
+  ;; Insead of "..." show "…" when there's hidden folded content
+  ;; Some characters to choose from: …, ⤵, ▼, ↴, ⬎, ⤷, and ⋱
+  (setq org-ellipsis "⤵")
+
+  ;; Show headings up to level 2 by default when opening an org files
+  (setq org-startup-folded 'content)
+
+  ;; Show inline images by default
+  (setq org-startup-with-inline-images t)
+  (setq org-hide-leading-stars t)
+  (setq org-src-fontify-natively t)
+  (setq org-startup-indented t)
+  (setq org-log-done t)
+  (setq org-email-link-description-format "Email %c (%d): %s")
+
+  (setq org-clock-persist-query-save t)
+
+
+  (setq org-directory "~/org/")
+  (setq org-hide-leading-stars t)
+  (setq org-src-fontify-natively t)
+  ;; set maximum indentation for description lists
+  (setq org-list-description-max-indent 5)
+
+  ;; prevent demoting heading also shifting text inside sections
+  (setq org-adapt-indentation nil)
+  (setq org-log-done 'time)
+  ;; start agenda at today
+  (setq org-agenda-start-on-weekday nil)
+  (setq org-capture-templates
+      '(
+    ("t" "Todo" entry (file+headline "~/org/gtd.org.gpg" "Inbox")
+      "* TODO %?\n  %i\n  %a\nAdded: %U")
+    ("m" "Meeting" entry (file "~/org/meetings.org.gpg")
+      "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+    ("j" "Journal" entry (file+datetree "~/org/journal.org.gpg")
+      "* %?\nEntered on %U\n  %i\n  %a"))
+  )
+
+  (setq org-agenda-files
+    (quote
+      ("~/org/agenda.org.gpg"
+       "~/org/gtd.org.gpg")))
+
+  ;; Enable shift-arrow move
+  (add-hook 'org-shiftup-final-hook 'windmove-up)
+  (add-hook 'org-shiftleft-final-hook 'windmove-left)
+  (add-hook 'org-shiftdown-final-hook 'windmove-down)
+  (add-hook 'org-shiftright-final-hook 'windmove-right)
+
+  ;; Custom func to load gtd file
+  (defun gtd ()
+     (interactive)
+     (find-file "~/org/gtd.org.gpg")
+   )
+  )
+#+END_SRC
+
+** Org Packages
+*** Bullet: replace star with utf-8 bullets
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :after org
+  :init
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+)
+#+END_SRC
+
+* Mail
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package notmuch
+  :config
+  (setq
+    notmuch-show-logo nil
+    ;; notmuch-search-oldest-first defines the sort order
+    notmuch-search-oldest-first nil
+    ;; multi sender, unused?
+    message-sendmail-envelope-from 'header
+    mail-specify-envelope-from 'header
+
+    mail-envelope-from 'header
+
+    ;; notmuch-show-all-multipart/alternative-parts defines that notmuch should
+    ;; not show all alternative parts of the mail; this is often just some junk
+    ;; I'm not interested in.
+    notmuch-show-all-multipart/alternative-parts nil
+
+    mime-edit-pgp-encrypt-to-self t
+    mml-secure-openpgp-encrypt-to-self t
+    mml-secure-openpgp-sign-with-sender t
+
+    notmuch-crypto-process-mime t
+
+    message-send-mail-function 'message-send-mail-with-sendmail
+    sendmail-program "~/.local/bin/msmtp-enqueue.sh"
+    message-sendmail-f-is-evil nil
+
+    ;; Get sending mail error
+    mail-interactive t
+
+    message-kill-buffer-on-exit t
+    mail-user-agent 'message-user-agent
+    notmuch-always-prompt-for-sender t
+    notmuch-fcc-dirs '((".*" . "Maildir/sent"))
+    notmuch-show-indent-messages-width 4
+    notmuch-saved-searches '(
+      (:name "inbox" :query "tag:inbox" :key "i")
+      (:name "unread" :query "tag:unread" :key "u")
+      (:name "flagged" :query "tag:flagged" :key "f")
+      (:name "sent" :query "tag:sent" :key "t")
+      (:name "drafts" :query "tag:draft" :key "d")
+      (:name "all mail" :query "*" :key "a")
+      )
+    )
+
+  ;; TODO: move those to use-package bind list
+  (define-key notmuch-show-mode-map "\C-c\C-o" 'browse-url-at-point)
+  (define-key notmuch-search-mode-map "g"
+    'notmuch-poll-and-refresh-this-buffer)
+  (define-key notmuch-hello-mode-map "g"
+    'notmuch-poll-and-refresh-this-buffer)
+
+  (define-key notmuch-search-mode-map "d"
+    (lambda ()
+      "toggle deleted tag for thread"
+      (interactive)
+      (if (member "deleted" (notmuch-search-get-tags))
+          (notmuch-search-tag '("-deleted"))
+      (notmuch-search-tag '("+deleted" "-inbox" "-unread")))))
+
+  (define-key notmuch-search-mode-map "!"
+    (lambda ()
+      "toggle unread tag for thread"
+      (interactive)
+      (if (member "unread" (notmuch-search-get-tags))
+          (notmuch-search-tag '("-unread"))
+      (notmuch-search-tag '("+unread")))))
+
+  (define-key notmuch-show-mode-map "d"
+    (lambda ()
+      "toggle deleted tag for message"
+      (interactive)
+      (if (member "deleted" (notmuch-show-get-tags))
+          (notmuch-show-tag '("-deleted"))
+      (notmuch-show-tag '("+deleted" "-inbox" "-unread")))))
+
+  (define-key notmuch-search-mode-map "a"
+    (lambda ()
+      "toggle archive"
+      (interactive)
+      (if (member "archive" (notmuch-search-get-tags))
+          (notmuch-search-tag '("-archive"))
+      (notmuch-search-tag '("+archive" "-inbox" "-unread")))))
+
+  (define-key notmuch-show-mode-map "a"
+    (lambda ()
+      "toggle archive"
+      (interactive)
+      (if (member "archive" (notmuch-show-get-tags))
+          (notmuch-show-tag '("-archive"))
+      (notmuch-show-tag '("+archive" "-inbox" "-unread")))))
+
+  (define-key notmuch-hello-mode-map "i"
+    (lambda ()
+      (interactive)
+      (notmuch-hello-search "tag:inbox")))
+
+  (define-key notmuch-hello-mode-map "u"
+    (lambda ()
+      (interactive)
+      (notmuch-hello-search "tag:unread")))
+
+  (define-key notmuch-hello-mode-map "a"
+    (lambda ()
+      (interactive)
+      (notmuch-hello-search "tag:archive")))
+)
+#+END_SRC
+
+* Programming
+** General
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package prog-mode
+  :config (global-prettify-symbols-mode)
+  (defun indicate-buffer-boundaries-left ()
+    (setq indicate-buffer-boundaries 'left))
+  (add-hook 'prog-mode-hook #'indicate-buffer-boundaries-left))
+
+(use-package simple
+  :config (column-number-mode))
+
+(progn ;    `text-mode'
+  (add-hook 'text-mode-hook #'indicate-buffer-boundaries-left))
+#+END_SRC
+
+*** Flycheck
+Linting
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package flycheck
+  :hook ((prog-mode ledger-mode) . flycheck-mode)
+  :diminish
+  :config
+  (global-flycheck-mode)
+  (setq flycheck-python-mypy-cache-dir "~/.mypy-cache")
+)
+#+END_SRC
+** RPM
+#+BEGIN_SRC emacs-lisp
+(use-package rpm-spec-mode)
+#+END_SRC
+
+** Jinja
+#+BEGIN_SRC emacs-lisp
+(use-package jinja2-mode)
+#+END_SRC
+
+** Yaml
+#+BEGIN_SRC emacs-lisp
+(use-package yaml-mode)
+#+END_SRC
+
+** GLSL: OpenGL Shader Language
+#+BEGIN_SRC emacs-lisp
+(use-package glsl-mode
+  :mode ("\\.vert\\'" "\\.frag\\'" "\\.glsl\\'" "\\.geom\\'"))
+(use-package company-glsl
+  :after glsl-mode
+  :config (add-to-list 'company-backends 'company-glsl))
+#+END_SRC
+
+** Python
+#+BEGIN_SRC emacs-lisp
+(use-package cython-mode
+  :mode ("\\.pyd\\'" "\\.pyi\\'" "\\.pyx\\'"))
+(use-package flycheck-cython
+  :after (cython-mode flycheck))
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(use-package python
+  :mode (("\\.py\\'" . python-mode))
+  :interpreter ("python3" . python-mode)
+  :init
+  (setq
+    python-shell-interpreter "python3"
+    py-python-command "python3"
+    ;; Don't spam message buffer when python-mode can't guess indent-offset
+    python-indent-guess-indent-offset-verbose nil
+))
+#+END_SRC
+
+** Lisp
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package lisp-mode)
+#+END_SRC
+
+** Javascript
+#+BEGIN_SRC emacs-lisp
+(use-package js2-mode
+  :config
+  (setq-default
+    js2-strict-missing-semi-warning nil
+  )
+)
+(use-package rjsx-mode)
+#+END_SRC
+
+* Post Initialization
+#+BEGIN_SRC emacs-lisp
+(message "Loading %s...done (%.3fs)" user-init-file
+         (float-time (time-subtract (current-time)
+                                    before-user-init-time)))
+(add-hook 'after-init-hook
+  (lambda ()
+    (message "Loading %s...done (%.3fs) [after-init]" user-init-file
+      (float-time (time-subtract (current-time) before-user-init-time)))
+    ;; Restore original file name handlers
+    (setq file-name-handler-alist file-name-handler-alist-old)
+    ;; Let's lower our GC thresholds back down to a sane level.
+    (setq gc-cons-threshold (* 20 1024 1024))
+    ;; Finaly disable tool-bar, check initialization notes
+    (tool-bar-mode -1)
+    ;; Go to home directory
+    (cd (expand-file-name "~/")))
+  t)
+#+END_SRC
+
+* TODOs
+** TODO Fix the above inlined TODOs
+** TODO Make magit sign-off commits
+** TODO Improve org usage
+** TODO Configure yassnippet and abbrev mode
+** TODO Look at company-mode and enable it
+** TODO Look for paren bug: (>) doesn't match properly...

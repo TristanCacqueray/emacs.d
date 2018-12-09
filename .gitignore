@@ -4,6 +4,12 @@
 /elpa
 /var
 /init.el*
+/identity.el*
+/bookmarks
 /places
 /history
+/recentf
+/saveplace
+/projectile.cache
 /projectile-bookmarks.eld
+/early-init.el
