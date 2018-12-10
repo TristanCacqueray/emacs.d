@@ -106,7 +106,7 @@ scratch buffer by default
 
 ** Package Management
 *** Org config tangle
-There is no ~emacs.el~ in this repo. It will automatically created for you
+There is no ~emacs.el~ in this repo. It will automatically be created for you
 from this file (~emacs.org~) when you run ~make build-init~.
 
 Don't forget to call ~make~ every time you edit this file.
@@ -140,6 +140,14 @@ Initialize borg package management.
 Assimilate new packages using the ~borg-clone~ and ~borg-build~ or simply
 the ~borg-assimilate~ command.
 Update version by changing git submodule and running make.
+
+Borg uses ssh by default, if you don't have a git account, run these
+commands:
+#+BEGIN_SRC bash :tangle no
+git config --global url.https://github.com/.insteadOf git@github.com:
+git config --global url.https://gitlab.com/.insteadOf git@gitlab.com:
+git config --global url.https://code.orgmode.org/.insteadOf git@code.orgmode.org:
+#+END_SRC
 
 *** Use-Package
 The use-package macro allows you to isolate package configuration in your
