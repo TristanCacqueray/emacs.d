@@ -418,8 +418,8 @@ The file content shall be assimilated in the main configuration if relevant.
 #+BEGIN_SRC emacs-lisp
 (use-package autorevert
   :defer 1
-  ;; TODO: check what is this
-  ;;:hook (find-file . auto-revert-mode)
+  ;; Auto revert file on opening
+  :hook (find-file . auto-revert-mode)
   :config
   ;; We only really need auto revert for git files
   ;; and we use magits `magit-auto-revert-mode' for that
@@ -427,7 +427,8 @@ The file content shall be assimilated in the main configuration if relevant.
   (global-auto-revert-mode nil)
 
   ;; Turn off auto revert messages
-  (setq auto-revert-verbose nil))
+  ;; (setq auto-revert-verbose nil)
+)
 #+END_SRC
 
 ** Epa: EasyPG Assistant
