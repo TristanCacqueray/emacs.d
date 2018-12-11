@@ -798,6 +798,7 @@ Enable Vim command such as ":vsp"
 Replace evil search function "/" by swiper
 #+BEGIN_SRC emacs-lisp
 (use-package swiper
+  :bind (("M-s" . swiper))
   :config
   (define-key evil-normal-state-map "/" 'swiper))
 #+END_SRC
