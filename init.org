@@ -1173,7 +1173,11 @@ Linting
   :diminish
   :config
   (global-flycheck-mode)
-  (setq flycheck-python-mypy-cache-dir "~/.mypy-cache")
+  (setq
+    ;; Only do flycheck when I actually safe the buffer
+    flycheck-check-syntax-automatically '(save mode-enable)
+    ;; Keep a global mypy cache
+    flycheck-python-mypy-cache-dir "~/.mypy-cache")
 )
 #+END_SRC
 ** RPM
