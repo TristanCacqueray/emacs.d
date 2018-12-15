@@ -131,6 +131,12 @@
 [submodule "org-bullets"]
 	path = lib/org-bullets
 	url = git@github.com:emacsorphanage/org-bullets.git
+[submodule "ox-gfm"]
+	path = lib/ox-gfm
+	url = git@github.com:larstvei/ox-gfm.git
+[submodule "ox-rst"]
+	path = lib/ox-rst
+	url = git@github.com:msnoigrs/ox-rst.git
 [submodule "packed"]
 	path = lib/packed
 	url = git@github.com:emacscollective/packed.git

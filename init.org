@@ -965,60 +965,42 @@ Replace evil search function "/" by swiper
 #+END_SRC
 
 * Org mode
+** General Setup
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package org
-  :bind (("C-c a"   . org-agenda)
-         ("C-c c"   . org-capture))
   :config
-  ;; Insead of "..." show "…" when there's hidden folded content
-  ;; Some characters to choose from: …, ⤵, ▼, ↴, ⬎, ⤷, and ⋱
-  (setq org-ellipsis "⤵")
+  (setq-default
+    ;; Tell org where are the files
+    org-directory "~/org/"
 
-  ;; Show headings up to level 2 by default when opening an org files
-  (setq org-startup-folded 'content)
+    ;; Keep shift arrow to change buffer, not org info
+    org-support-shift-select (quote always)
 
-  ;; Show inline images by default
-  (setq org-startup-with-inline-images t)
-  (setq org-hide-leading-stars t)
-  (setq org-src-fontify-natively t)
-  (setq org-startup-indented t)
-  (setq org-log-done t)
-  (setq org-email-link-description-format "Email %c (%d): %s")
+    ;; Insead of "..." show "…" when there's hidden folded content
+    ;; Some characters to choose from: …, ⤵, ▼, ↴, ⬎, ⤷, and ⋱
+    org-ellipsis "⤵"
 
-  (setq org-clock-persist-query-save t)
+    ;; Show headings up to level 2 by default when opening an org files
+    org-startup-folded 'content
 
+    ;; TODO what is this?
+    org-startup-indented t
+    org-src-fontify-natively t
+    org-startup-indented t
+    org-log-done t
+    org-clock-persist-query-save t
+    org-adapt-indentation nil
+    org-log-done 'time
 
-  (setq org-directory "~/org/")
-  (setq org-hide-leading-stars t)
-  (setq org-src-fontify-natively t)
-  ;; set maximum indentation for description lists
-  (setq org-list-description-max-indent 5)
+    ;; Show inline images by default
+    org-startup-with-inline-images t
 
-  ;; prevent demoting heading also shifting text inside sections
-  (setq org-adapt-indentation nil)
-  (setq org-log-done 'time)
-  ;; start agenda at today
-  (setq org-agenda-start-on-weekday nil)
-  (setq org-capture-templates
-      '(
-    ("t" "Todo" entry (file+headline "~/org/gtd.org.gpg" "Inbox")
-      "* TODO %?\n  %i\n  %a\nAdded: %U")
-    ("m" "Meeting" entry (file "~/org/meetings.org.gpg")
-      "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-    ("j" "Journal" entry (file+datetree "~/org/journal.org.gpg")
-      "* %?\nEntered on %U\n  %i\n  %a"))
-  )
+    ;; Only show one star, though this is overridden by org-bullets
+    org-hide-leading-stars t
 
-  (setq org-agenda-files
-    (quote
-      ("~/org/agenda.org.gpg"
-       "~/org/gtd.org.gpg")))
-
-  ;; Enable shift-arrow move
-  (add-hook 'org-shiftup-final-hook 'windmove-up)
-  (add-hook 'org-shiftleft-final-hook 'windmove-left)
-  (add-hook 'org-shiftdown-final-hook 'windmove-down)
-  (add-hook 'org-shiftright-final-hook 'windmove-right)
+    ;; Mail link description format, %c if from or to when sent by me
+    org-email-link-description-format "Email %c (%d): %s"
+    )
 
   ;; Custom func to load gtd file
   (defun gtd ()
@@ -1029,13 +1011,85 @@ Replace evil search function "/" by swiper
 #+END_SRC
 
 ** Org Packages
+*** Capture: quickly capture informations from anywhere
+#+BEGIN_SRC emacs-lisp
+(use-package org-capture
+  :bind ("C-c c" . org-capture)
+  :config
+  (setq org-capture-templates
+    '(
+      ("t" "Todo" entry (file+headline "gtd.org.gpg" "Inbox")
+       "* TODO %?\n  %i\n  %a\nAdded: %U")
+      ("m" "Meeting" entry (file "agenda.org.gpg")
+       "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+      ("j" "Journal" entry (file+datetree "journal.org.gpg")
+       "* %?\nEntered on %U\n  %i\n  %a")
+     )
+  )
+)
+#+END_SRC
+*** Agenda: show agenda with scheduled todos
+#+BEGIN_SRC emacs-lisp
+(use-package org-agenda
+  :bind ("C-c a"   . org-agenda)
+  :config
+  (setq-default
+    ;; Start agenda at today
+    org-agenda-start-on-weekday nil
+    ;; Look for agenda item in every org files
+    org-agenda-files '("~/org")
+    ;; Match those files
+    org-agenda-file-regexp "\\`[^.].*\\.org\\(.gpg\\)?\\'"
+   )
+)
+#+END_SRC
 *** Bullet: replace star with utf-8 bullets
 #+BEGIN_SRC emacs-lisp
 (use-package org-bullets
   :after org
-  :init
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  :hook (org-mode . org-bullets-mode)
 )
+#+END_SRC
+*** Export: export settings
+#+BEGIN_SRC emacs-lisp
+(use-package ox
+  :config
+  (setq-default
+    ;; Use html5 as org export and use new tags
+    org-html-doctype "html5"
+    org-html-html5-fancy t
+    ;; Don't add html footer to export
+    org-html-postamble nil
+    ;; Don't export ^ or _ as super/subscripts
+    org-export-with-sub-superscripts nil
+  )
+)
+;; Github markdown
+(use-package ox-gfm
+  :after ox)
+
+;; reStructuredText
+(use-package ox-rst
+  :after ox)
+#+END_SRC
+*** Habit: special todo items for repeated task
+What’s really useful about habits is that they are displayed along with a
+consistency graph, to show how consistent you’ve been at getting that
+task done in the past.
+#+BEGIN_SRC emacs-lisp
+(use-package org-habit
+  :after org)
+#+END_SRC
+
+*** Expiry: Automatically add a CREATED property when inserting a new headline
+#+BEGIN_SRC emacs-lisp
+(use-package org-expiry
+  ;; TODO: check why load-path is needed here
+  :load-path "~/.emacs.d/lib/org/contrib/lisp/"
+  :after org
+  :config
+  (setq org-expiry-inactive-timestamps t)
+  (org-expiry-insinuate))
 #+END_SRC
 
 * Mail
