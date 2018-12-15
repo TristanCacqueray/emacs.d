@@ -605,7 +605,10 @@ TODO: auto enable on prog mode
 (use-package beacon
   :defer 5
   :diminish
-  :config (beacon-mode 1))
+  :config
+  ;; don't blink in notmuch-search, it's both slow and ugly
+  (add-to-list 'beacon-dont-blink-major-modes #'notmuch-search-mode)
+  (beacon-mode 1))
 #+END_SRC
 
 *** which-key: Display available keybindings in popup
@@ -1185,19 +1188,609 @@ task done in the past.
   (org-expiry-insinuate))
 #+END_SRC
 
+*** Notmuch: link mail from org mode
+#+BEGIN_SRC emacs-lisp
+(use-package org-notmuch
+  :demand t
+  :after (:any org notmuch))
+#+END_SRC
+
 * Mail
+This is my setup to process mails. As a disclaimer I'm posting here as other
+may find it useful, but be advised it's fine tuned for my personal needs.
+In particular, this setup features:
+
+- Different specialized tools for each task instead of an all-in-one solution.
+  I find usual client like thunderbird not good enough at syncing and archiving.
+  Tools like dovecot sieve and mbsync are much more efficient.
+- Tag based index instead of folder hierarchy. This enables differents views such as
+  by sender or by topic, while keeping the actual mail file in a single place.
+- Local archive for fast search and org-mode references. This is very powerful combined
+  with org-capture as it enables todos with direct reference to a mail view.
+- New threads gets an *unseen* tag that I triage as *watched* or *ignored*.
+  This is a key feature to keep a low noise ratio for busy lists.
+  I use a custom python script to apply tags based on a complex rules.
+- Handle large volume.
+
+** Command lines
+*** mbsync
+Mbsync fetchs all the mails from imaps to the local inbox. This configuration doesn't
+expunge and leave the mail untouched on the remote server.
+#+BEGIN_SRC txt :tangle ~/mail-conf/mbsyncrc.sample
+Expunge None
+Create Both
+
+MaildirStore local
+Path ~/Maildir/
+Inbox ~/Maildir/inbox/
+Trash Trash
+
+IMAPStore home
+User tristanC
+Pass secret
+Host imap.perso
+
+Channel home
+Master :home:
+Slave :local:
+Expunge None
+Sync Pull
+
+IMAPStore work
+User tdecacqu
+Pass secret
+Host imap.corp
+AuthMechs LOGIN
+SSLType IMAPS
+SSLVersions TLSv1.2
+
+Channel work
+Master :work:
+Slave :local:
+Expunge None
+Sync Pull
+
+Channel work-memo
+Master :work:"memo-list"
+Slave :local:
+Expunge None
+Sync Pull
+#+END_SRC
+
+*** sieve-filter
+Dovecot sieve filter just move the mails from the mbsync inbox to date
+based folders to store the mails archived by default.
+#+BEGIN_SRC txt :tangle ~/mail-conf/filter.sieve
+require ["fileinto", "date", "variables", "mailbox", "regex"];
+
+# Default variables
+set "box" "unknown";
+set "month" "00";
+set "year" "0000";
+
+# Extract Date: header
+if date :matches "date" "month" "*" { set "month" "${1}"; }
+if date :matches "date" "year"  "*" { set "year"  "${1}"; }
+
+# Notifications
+if anyof (exists "X-Gerrit-Change-Id",
+          exists "X-Jenkins-Job",
+          exists "X-Cron-Env",
+          exists "X-GitHub-Sender",
+          exists "X-Launchpad-Bug",
+          exists "X-Bugzilla-Product",
+          exists "X-JIRA-FingerPrint",
+          exists "X-StoryBoard-Subscription-Type") {
+    set "box" "pulse/${year}.${month}";
+}
+
+# Feeds
+elsif exists "X-RSS-ID" {
+    set "box" "feeds/${year}.${month}";
+}
+
+# Lists
+elsif exists "List-Id" {
+    set "box" "lists/${year}.${month}";
+}
+
+# Big mails
+elsif size :over 1M {
+    set "box" "parcel/${year}.${month}";
+}
+
+# Archive the rest
+else {
+    set "box" "letterbox/${year}.${month}";
+}
+
+fileinto :create "${box}";
+#+END_SRC
+
+To run sieve-filter manually, dovecot needs this configuration:
+#+BEGIN_SRC txt :tangle ~/mail-conf/dovecot.conf
+postmaster_address = root@localhost
+mail_location = maildir:~/Maildir/:INBOX=~/Maildir/inbox:LAYOUT=fs
+
+plugin {
+    sieve_global =
+}
+#+END_SRC
+
+*** notmuch-config
+"notmuch new" indexes every new files and adds the new tag. The synchronize_flags
+option let it mark the filename with the draft and unread tag when needed.
+#+BEGIN_SRC txt :tangle ~/mail-conf/notmuch-config.sample
+[database]
+path=/home/Maildir
+
+[user]
+name=Tristan
+primary_mail=tristanC@wombatt.eu
+
+[new]
+tags=new;
+ignore=
+
+[search]
+exclude_tags=deleted;spam;
+
+[maildir]
+synchronize_flags=true
+
+[crypto]
+gpg_path=gpg2
+#+END_SRC
+
+*** notmuch-tag
+Here is my custom script to process the new mails, inspired by [[https://notmuchmail.org/initial_tagging/][this doc]]:
+#+BEGIN_SRC python :tangle ~/mail-conf/notmuch-tag.py :tangle-mode (identity #o755)
+#!/bin/env python3
+import email
+import time
+import notmuch
+import argparse
+import logging
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--debug", action="store_true")
+parser.add_argument("--dry", action="store_true")
+parser.add_argument("--query", default="tag:new")
+args = parser.parse_args()
+logging.basicConfig(format='%(asctime)s %(levelname)s - %(message)s',
+    level=logging.DEBUG if args.debug else logging.INFO)
+log = logging.getLogger()
+
+start_time = time.time()
+#+END_SRC
+
+First load some custom list:
+#+BEGIN_SRC python :tangle ~/mail-conf/notmuch-tag.py
+def readlines(name):
+    """Read file, remove comment and return lowercase line lists"""
+    return filter(lambda x: x != '' and x[0] != '#',
+        map(str.strip,
+            map(str.lower,
+                open("mail-conf/taglist-%s.txt" % name).readlines())))
+
+def load_list(name):
+    """Return un-ordered list"""
+    return set(readlines(name))
+
+def load_taglist(name):
+    """Return ordered list of (id, [tags, ])"""
+    return list(
+        map(lambda x: (x.split()[0], x.split(None, 1)[1].split()),
+            readlines(name)))
+
+# My mail addresses
+me = load_list("me")
+# List of special people
+boss = load_list("boss")
+vip = load_list("vip")
+team = load_list("team")
+vmt = load_list("vmt")
+bots = load_list("bots")
+spam = load_list("spam")
+# Packages I care about
+pkgs = load_list("packages")
+# List-id to tags mapping
+lists = load_taglist("lists")
+#+END_SRC
+
+Utility function to load message body:
+#+BEGIN_SRC python :tangle ~/mail-conf/notmuch-tag.py
+def get_body(msg):
+    message = email.message_from_binary_file(open(msg.get_filename(), "rb"))
+    try:
+        if message.is_multipart():
+            # Load each parts
+            body = "".join(map(lambda x: x.as_string(), message.get_payload()))
+        else:
+            body = message.get_payload()
+    except (KeyError, UnicodeEncodeError, LookupError) as e:
+        log.exception("[W]: couldn't decode %s from %s (%s): %s",
+            msg.get_message_id(), msg.get_header("from"),
+            msg.get_header("subject"), e)
+        body = ""
+    return body.lower()
+#+END_SRC
+
+Main message processing function:
+#+BEGIN_SRC python :tangle ~/mail-conf/notmuch-tag.py
+def process(msg):
+    tags = set()
+    mail_to = msg.get_header("To").lower()
+    mail_cc = msg.get_header("Cc").lower()
+    mail_from = msg.get_header("From").lower()
+    mail_sender = msg.get_header("Sender").lower()
+    subject = msg.get_header("Subject").lower()
+    gh_sender = msg.get_header("X-GitHub-Sender")
+    thread_id = msg.get_thread_id()
+    body = get_body(msg)
+
+    # This process remove the new tag
+    tags.add('-new')
+
+    # Check mail_to
+    if [True for s in me if s in mail_to or s in mail_cc]:
+        tags.add("to-me")
+
+    # Check mail_from
+    if [True for s in me if s in mail_from]:
+        tags.add("sent")
+        tags.add("inbox")
+        tags.add("-quoted")
+        tags.add("-unread")
+    elif [True for s in boss if s in mail_from]:
+        tags.add("boss")
+    elif [True for s in vip if s in mail_from]:
+        tags.add("vip")
+    elif [True for s in team if s in mail_from]:
+        tags.add("team")
+    elif [True for s in vmt if s in mail_from]:
+        # Only add vmt if content relate to vmt
+        if [True for c in ("security", "vmt", "ossa", "ossg")
+                 if (c in subject or c in body)]:
+            tags.add("vmt")
+    elif [True for s in spam if s in mail_from]:
+        tags.add("spam")
+        tags.add("-to-me")
+    elif "calendar-notification" in mail_from:
+        tags.add("calendar")
+        tags.add("-to-me")
+    elif "no-reply@taiga.io" in mail_from:
+        tags.add("bug")
+        tags.add("-to-me")
+        if "comment: " not in body:
+            tags.add("-unread")
+
+    # Check message headers
+    if msg.get_header("X-Gerrit-Change-Id"):
+        tags.add("code")
+        tags.add("-list")
+        tags.add("-to-me")
+        if " ci (code review)" in mail_from or \
+           "zuul (code review)" in mail_from or \
+           "jenkins (code review)" in mail_from:
+            # Mark CI results as read
+            tags.add("-unread")
+        elif msg.get_header("X-Gerrit-MessageType") == "comment":
+            if "comments)\n" not in body or "\nrecheck\n" in body:
+                tags.add("-unread")
+    elif gh_sender:
+        tags.add("code")
+        tags.add("-list")
+        tags.add("-to-me")
+        if gh_sender in bots:
+            # Mark CI results as read
+            tags.add("-unread")
+    # bug reports
+    elif (msg.get_header("X-Launchpad-Bug") or
+          "@bugs.launchpad.net" in mail_from):
+        tags.add("bug")
+        tags.add("-to-me")
+    elif (msg.get_header("X-StoryBoard-Subscription-Type") or
+          "@storyboard.openstack.org" in mail_from):
+        tags.add("bug")
+        tags.add("-to-me")
+    elif msg.get_header("X-Bugzilla-Product"):
+        tags.add("bug")
+        tags.add("-to-me")
+        if msg.get_header("X-Bugzilla-Comment") == "no":
+            tags.add("-unread")
+    elif msg.get_header("X-RSS-ID"):
+        tags.add("feed")
+    # vmt stuff
+    if msg.get_header("X-Launchpad-Bug-Security-Vulnerability") == "yes" or \
+       "OSSA" in subject or "embargo-notice" in subject:
+        tags.add("vmt")
+    if msg.get_header("X-Launchpad-Bug-Private") == "yes":
+        tags.add("watched")
+    # monitoring
+    if msg.get_header("X-Cron-Env") or \
+       "root@softwarefactory-project.io" in mail_from or \
+       "monit@" in mail_from:
+        tags.add("-to-me")
+        tags.add("-list")
+        tags.add("monit")
+    # mailing lists
+    list_id = msg.get_header("List-Id").lower()
+    if list_id and "-list" not in tags:
+        tags.add('list')
+        tags.add("-to-me")
+        found = False
+        for list_name, list_tags in lists:
+            if list_name in list_id:
+                for tag in list_tags:
+                    tags.add(tag)
+                found = True
+                break
+        if not found:
+            tags.add("untagged-list")
+
+        if "security.lists.openwall.com" in list_id and \
+           [True for pkg in pkgs if pkg in body]:
+            # Watch packages mentioned on oss-sec
+            tags.add("watched")
+
+    if "calendar-notification" in mail_sender:
+        if subject == "you have no events scheduled today.":
+            tags.add("-unread")
+        tags.add("-to-me")
+        tags.add("calendar")
+
+    if "-to-me" in tags:
+        tags.add("-inbox")
+
+    # Remove tags to be removed
+    for untag in [tag[1:] for tag in tags if tag[0] == "-"]:
+        if untag in tags:
+            tags.remove(untag)
+
+    # Check for quote
+    ignore_quote_set = set(("bug", "code", "sent", "to-me", "calendar"))
+    if not tags.intersection(ignore_quote_set) and (
+        "tdecacqu" in body or ("tristan" in body and "cacqueray" in body) or
+        "@tristan" in body):
+       qquoted = notmuch.Query(db, 'thread:%s and tag:replied' % thread_id)
+       if len(list(qquoted.search_messages())) == 0:
+           tags.add('quoted')
+
+    # Update watched tag
+    qwatched = notmuch.Query(db, 'thread:%s and tag:watched' % thread_id)
+    if len(list(qwatched.search_messages())) > 0:
+        tags.add('watched')
+
+    # Add unseen tag for new threads
+    if "-unread" not in tags and \
+       tags.intersection(set(("list", "code", "bug", "vmt"))):
+        qunseen = notmuch.Query(db, 'thread:%s and ('
+            'tag:inbox or tag:unseen or tag:watched or tag:ignored or '
+            'tag:archive or tag:deleted)' % thread_id)
+        if len(list(qunseen.search_messages())) == 0:
+            tags.add('unseen')
+
+    if 'to-me' in tags and '-to-me' not in tags:
+        tags.add('inbox')
+
+    log.debug("[%s]: from:%s subject:%s",
+        ", ".join(sorted(filter(lambda x: x[0] != "-", tags))),
+        mail_from, subject[:40])
+    return tags
+#+END_SRC
+
+Process new messages and apply tags:
+#+BEGIN_SRC python :tangle ~/mail-conf/notmuch-tag.py
+db = notmuch.Database(mode=notmuch.Database.MODE.READ_WRITE)
+idx = 0
+try:
+    for msg in notmuch.Query(db, args.query).search_messages():
+        if not args.dry:
+            msg.freeze()
+        tags = process(msg)
+        if args.dry:
+            continue
+
+        # Apply tags
+        for tag in tags:
+            if tag[0] == '+':
+                msg.add_tag(tag[1:])
+            elif tag[0] == '-':
+                sync = False
+                if tag == "-unread":
+                    # Propagate unread removal to the maildir filename
+                    sync = True
+                msg.remove_tag(tag[1:], sync_maildir_flags=sync)
+            else:
+                msg.add_tag(tag)
+
+        # Check for aliens, in case the process method didn't find any tags
+        if set(msg.get_tags()).issubset(set((
+                "attachment", "encrypted", "new", "signed", "unread"))):
+            # No tags was added, mark it to remember
+            # the process() method needs to be improved
+            msg.add_tag("alien")
+        msg.thaw()
+        idx += 1
+        if args.debug and idx % 100:
+            print("%d\r" % idx, end='')
+except KeyboardInterrupt:
+    pass
+log.info("Tagged %d messages in %1.2f seconds", idx, time.time() - start_time)
+exit(0)
+#+END_SRC
+
+*** msmtp
+msmtp takes care of processing the sendmail queue:
+#+BEGIN_SRC txt :tangle ~/mail-conf/msmtprc.sample
+defaults
+auth            on
+tls             on
+tls_trust_file  /etc/ssl/certs/ca-bundle.crt
+logfile         ~/logs/msmtp.log
+
+account         default
+host            smtp.corp
+port            587
+from            tdecacqu@
+
+account         perso
+host            smtp.perso
+port            25
+from            tristanC@
+#+END_SRC
+
+*** sync script
+Finally, this script wraps all the above:
+#+BEGIN_SRC bash :tangle ~/mail-conf/sync :tangle-mode (identity #o755)
+#!/bin/bash -e
+echo "$(date): begin"
+# Send the queue
+/usr/share/msmtp/msmtpqueue/msmtp-runqueue.sh
+# Sync mail
+mbsync -Va 2>&1 | tee logs/mbsync.log | grep "^master:"
+# Filter the inbox
+sieve-filter -W -e -c .dovecot.conf -v  .filter.sieve inbox &> logs/sieve.log
+# Index new mails
+notmuch new 2>&1 | grep -v "Ignoring non-mail file"
+# Tag new mails
+./conf/notmuch-tag.py --debug | tee logs/tag.log
+# Send notification
+NEW=$(notmuch count tag:inbox and tag:unread)
+if [ $NEW -gt 0 ]; then
+    notify-send "$NEW unread mails" --icon=mail-message-new
+fi
+# Backup
+if [ $[ $(date "+%s") - $(stat -c %Y backup/status || echo 0) ] -gt 86400 ]; then
+  echo "$(date): daily index backup"
+  notmuch dump | gzip -9 > backup/nm-dump-$(date "+%Y-%m-%d").gz && touch backup/status
+fi
+echo "$(date): done"
+#+END_SRC
+
+** Emacs configuration
+I use notmuch-hello mode to browse, manage and compose mails:
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package notmuch
+  :preface (setq-default notmuch-command "~/.emacs.d/lib/notmuch/notmuch")
+  :bind (("C-x m" . notmuch-hello)
+          (:map notmuch-show-mode-map
+           ("r" . notmuch-show-reply-sender)
+           ("R" . notmuch-show-reply)
+           ("a" . my/toggle-archive-message)
+           ("f" . my/toggle-flagged-message)
+           ("N" . my/toggle-unread-message)
+           ("*" . my/watch-message)
+           ("k" . my/ignore-message))
+          (:map notmuch-search-mode-map
+           ("r" . notmuch-search-reply-to-thread)
+           ("R" . notmuch-search-reply-to-thread-sender)
+           ("a" . my/toggle-archive-thread)
+           ("f" . my/toggle-flagged-thread)
+           ("D" . my/trash-thread)
+           ("N" . my/toggle-unread-thread)
+           ("*" . my/watch-thread)
+           ("k" . my/ignore-thread)))
   :config
-  (setq
+  (defun my/trash-thread (&optional beg end)
+    "delete a thread"
+    (interactive)
+    (notmuch-search-tag '("+deleted" "+ignored" "-inbox"))
+    (next-line))
+
+  (defun my/toggle-unread-thread (&optional beg end)
+    "toggle thread unread"
+    (interactive)
+    (if (member "unread" (notmuch-search-get-tags))
+        (notmuch-search-tag '("-unread"))
+        (notmuch-search-tag '("+unread")))
+    (next-line))
+
+  (defun my/toggle-unread-message ()
+    "toggle message unread"
+    (interactive)
+    (if (member "unread" (notmuch-show-get-tags))
+        (notmuch-show-tag '("-unread"))
+        (notmuch-show-tag '("+unread"))))
+
+  (defun my/toggle-flagged-thread (&optional beg end)
+    "toggle thread flagged"
+    (interactive)
+    (if (member "flagged" (notmuch-search-get-tags))
+        (notmuch-search-tag '("-flagged"))
+        (notmuch-search-tag '("+flagged"))))
+
+  (defun my/toggle-flagged-message ()
+    "toggle message flagged"
+    (interactive)
+    (if (member "flagged" (notmuch-show-get-tags))
+        (notmuch-show-tag '("-flagged"))
+        (notmuch-show-tag '("+flagged"))))
+
+  (defun my/toggle-archive-thread (&optional beg end)
+    "toggle thread archive"
+    (interactive)
+    (if (member "archive" (notmuch-search-get-tags))
+        (notmuch-search-tag '("-archive" "+inbox"))
+        (notmuch-search-tag '("+archive" "-inbox" "-unseen"))))
+
+  (defun my/toggle-archive-message ()
+    "toggle message archive"
+    (interactive)
+    (if (member "archive" (notmuch-show-get-tags))
+        (notmuch-show-tag '("-archive" "+inbox"))
+        (notmuch-show-tag '("+archive" "-inbox"))))
+
+  (defun my/ignore-thread (&optional beg end)
+    "Ignore a thread"
+    (interactive)
+    (notmuch-search-tag (list "-unseen" "-watched" "-inbox" "+ignored") beg end)
+    (next-line))
+
+  (defun my/ignore-message ()
+    "Ignore a thread from the show mode"
+    (interactive)
+    (notmuch-show-tag-all (list "-unseen" "-watched"))
+    (notmuch-show-tag (list "+ignored")))
+
+  (defun my/watch-thread (&optional beg end)
+    "Watch a thread"
+    (interactive)
+    (notmuch-search-tag (list "-unseen" "+watched" "-ignored") beg end)
+    (next-line))
+
+  (defun my/watch-message ()
+    "Watch a thread from the show mode"
+    (interactive)
+    (notmuch-show-tag-all (list "-unseen" "-ignored"))
+    (notmuch-show-tag (list "+watched")))
+
+  (setq-default
+    ;; do not load all the messages on search, needs:
+    ;; https://notmuchmail.org/pipermail/notmuch/2019/027309.html
+    notmuch-progressive-search t
+
+    ;; drop the logo on the front page
     notmuch-show-logo nil
+
+    ;; adjust hello sections
+    notmuch-hello-sections (quote (
+      notmuch-hello-insert-saved-searches
+      notmuch-hello-insert-recent-searches
+      notmuch-hello-insert-alltags
+      notmuch-hello-insert-footer))
+
     ;; notmuch-search-oldest-first defines the sort order
     notmuch-search-oldest-first nil
-    ;; multi sender, unused?
-    message-sendmail-envelope-from 'header
-    mail-specify-envelope-from 'header
 
-    mail-envelope-from 'header
+    ;; do not prompt for sender
+    notmuch-always-prompt-for-sender nil
+
+    ;; send from user-mail-address by default
+    message-sendmail-envelope-from nil
+    mail-specify-envelope-from nil
+    mail-envelope-from nil
 
     ;; notmuch-show-all-multipart/alternative-parts defines that notmuch should
     ;; not show all alternative parts of the mail; this is often just some junk
@@ -1210,90 +1803,142 @@ task done in the past.
 
     notmuch-crypto-process-mime t
 
+    ;; Send with msmtp
     message-send-mail-function 'message-send-mail-with-sendmail
-    sendmail-program "~/.local/bin/msmtp-enqueue.sh"
+    sendmail-program "/usr/share/msmtp/msmtpqueue/msmtp-enqueue.sh"
     message-sendmail-f-is-evil nil
 
     ;; Get sending mail error
     mail-interactive t
 
+    notmuch-message-headers '("To" "Cc" "Subject" "Date")
+
+    ;; Keep a local copy of sent mail
+    notmuch-fcc-dirs '((".*" . "Maildir/sent"))
     message-kill-buffer-on-exit t
     mail-user-agent 'message-user-agent
-    notmuch-always-prompt-for-sender t
-    notmuch-fcc-dirs '((".*" . "Maildir/sent"))
     notmuch-show-indent-messages-width 4
     notmuch-saved-searches '(
-      (:name "inbox" :query "tag:inbox" :key "i")
-      (:name "unread" :query "tag:unread" :key "u")
-      (:name "flagged" :query "tag:flagged" :key "f")
-      (:name "sent" :query "tag:sent" :key "t")
-      (:name "drafts" :query "tag:draft" :key "d")
-      (:name "all mail" :query "*" :key "a")
-      )
-    )
+      (:name "alien"    :key "a" :query "tag:alien")
+      (:name "inbox"    :key "i" :query "tag:inbox"
+                           :count-query "tag:inbox and tag:unread")
+      (:name "flagged"  :key "f" :query "tag:flagged"
+                           :count-query "tag:flagged and tag:unread")
+      (:name "sicp"     :key "S" :query "tag:sicp and not tag:ignored"
+                           :count-query "tag:sicp and not tag:ignored and tag:unread")
+      (:name "sec"      :key "s" :query "(tag:vmt or (tag:watched and tag:sec))"
+                           :count-query "(tag:vmt or (tag:watched and tag:sec)) and tag:unread")
+      (:name "monit"    :key "m" :query "tag:monit and not tag:ignored"
+                           :count-query "tag:monit and not tag:ignored and tag:unread" :key "m")
+      (:name "team"     :key "t" :query "tag:team and not (tag:code or tag:calendar)"
+                           :count-query "tag:team and not (tag:code or tag:calendar) and tag:unread")
+      (:name "code"     :key "c" :query "(tag:watched and (tag:code or tag:bug))"
+                           :count-query "(tag:watched and (tag:code or tag:bug)) and tag:unread")
+      (:name "watched"  :key "w" :query "(tag:watched and not (tag:code or tag:bug))"
+                           :count-query "(tag:watched and not (tag:code or tag:bug)) and tag:unread")
+      (:name "new-code" :key "C" :query "tag:unseen and (tag:code or tag:bug)")
+      (:name "unseen"   :key "u" :query "tag:unseen and not (tag:code or tag:bug)" :sort-order 'oldest-first)
+      (:name "vip"      :key "v" :query "(tag:vip or tag:boss)"
+                           :count-query "(tag:vip or tag:boss) and tag:unread")
+      (:name "calendar" :key "g" :query "tag:calendar"
+                           :count-query "tag:calendar and tag:unread")
+      (:name "quoted"   :key "q" :query "tag:quoted"
+                           :count-query "tag:quoted and tag:unread")
+      (:name "feed"     :key "F" :query "tag:feed and not tag:ignored"
+                           :count-query "tag:feed and not tag:ignored and tag:unread")
+      (:name "weekly"   :key "W" :query "date:last_week..now and not tag:ignored"
+                           :count-query "date:last_week..now and not tag:ignored tag:unread")
+      (:name "drafts"   :key "d" :query "tag:draft")
+      (:name "all mail"          :query "*"))))
 
-  ;; TODO: move those to use-package bind list
-  (define-key notmuch-show-mode-map "\C-c\C-o" 'browse-url-at-point)
-  (define-key notmuch-search-mode-map "g"
-    'notmuch-poll-and-refresh-this-buffer)
-  (define-key notmuch-hello-mode-map "g"
-    'notmuch-poll-and-refresh-this-buffer)
+(use-package message
+  :config
+  (setq
+    ;; Set domain name for message-ID
+    message-user-fqdn "fedora"
 
-  (define-key notmuch-search-mode-map "d"
-    (lambda ()
-      "toggle deleted tag for thread"
-      (interactive)
-      (if (member "deleted" (notmuch-search-get-tags))
-          (notmuch-search-tag '("-deleted"))
-      (notmuch-search-tag '("+deleted" "-inbox" "-unread")))))
+    ;; Cite reply author with a date
+    message-citation-line-format "On %a, %b %d, %Y at %H:%M %N wrote:"
+    message-citation-line-function 'message-insert-formatted-citation-line)
 
-  (define-key notmuch-search-mode-map "!"
-    (lambda ()
-      "toggle unread tag for thread"
-      (interactive)
-      (if (member "unread" (notmuch-search-get-tags))
-          (notmuch-search-tag '("-unread"))
-      (notmuch-search-tag '("+unread")))))
+  ;; Auto sign mails (borrowed from https://emacs.stackexchange.com/questions/19867/set-the-pgp-signing-marker-to-the-top-of-the-new-message)
+  (defun ck/sign-message ()
+    "Add the #secure tag on top of the message"
+    (interactive)
+    (goto-char (point-min))
+    (search-forward "--text follows this line--")
+    (end-of-line)
+    (insert "\n")
+    (mml-secure-message-sign-pgpmime))
+  (add-hook 'message-setup-hook 'ck/sign-message)
 
-  (define-key notmuch-show-mode-map "d"
-    (lambda ()
-      "toggle deleted tag for message"
-      (interactive)
-      (if (member "deleted" (notmuch-show-get-tags))
-          (notmuch-show-tag '("-deleted"))
-      (notmuch-show-tag '("+deleted" "-inbox" "-unread")))))
 
-  (define-key notmuch-search-mode-map "a"
-    (lambda ()
-      "toggle archive"
-      (interactive)
-      (if (member "archive" (notmuch-search-get-tags))
-          (notmuch-search-tag '("-archive"))
-      (notmuch-search-tag '("+archive" "-inbox" "-unread")))))
+  ;; Encrypt mails by calling (mml-secure-message-encrypt-pgpmime)
 
-  (define-key notmuch-show-mode-map "a"
-    (lambda ()
-      "toggle archive"
-      (interactive)
-      (if (member "archive" (notmuch-show-get-tags))
-          (notmuch-show-tag '("-archive"))
-      (notmuch-show-tag '("+archive" "-inbox" "-unread")))))
+  ;; Redefine message-unique-id to generate custom Message-ID without fsf@
+  (defun message-unique-id ()
+    ;; Don't use microseconds from (current-time), they may be unsupported.
+    ;; Instead we use this randomly inited counter.
+    (setq message-unique-id-char
+      (% (1+ (or message-unique-id-char
+          (logand (random most-positive-fixnum) (1- (lsh 1 20)))))
+      ;; (current-time) returns 16-bit ints,
+      ;; and 2^16*25 just fits into 4 digits i base 36.
+      (* 25 25)))
+    (let ((tm (current-time)))
+      (concat
+        (if (or (eq system-type 'ms-dos)
+          ;; message-number-base36 doesn't handle bigints.
+          (floatp (user-uid)))
+        (let ((user (downcase (user-login-name))))
+          (while (string-match "[^a-z0-9_]" user)
+            (aset user (match-beginning 0) ?_))
+            user)
+        (message-number-base36 (user-uid) -1))
+        (message-number-base36 (+ (car tm)
+                                  (lsh (% message-unique-id-char 25) 16)) 4)
+        (message-number-base36 (+ (nth 1 tm)
+                                  (lsh (/ message-unique-id-char 25) 16)) 4)
+     ;; Append a given name, because while the generated ID is unique
+     ;; to this newsreader, other newsreaders might otherwise generate
+     ;; the same ID via another algorithm.
+     ".tristanC"))))
 
-  (define-key notmuch-hello-mode-map "i"
-    (lambda ()
-      (interactive)
-      (notmuch-hello-search "tag:inbox")))
+(use-package mml
+  :config
+  (progn
+    ;; http://mbork.pl/2015-11-28_Fixing_mml-attach-file_using_advice
+    (defun my:mml-attach-file--go-to-eob (orig-fun &rest args)
+      "Go to the end of buffer before attaching files."
+      (save-excursion
+        (save-restriction
+          (widen)
+          (goto-char (point-max))
+          (apply orig-fun args))))
+    (advice-add 'mml-attach-file :around #'my:mml-attach-file--go-to-eob)
 
-  (define-key notmuch-hello-mode-map "u"
-    (lambda ()
-      (interactive)
-      (notmuch-hello-search "tag:unread")))
+    ;; Remove old interface
+    (defun mml-secure-sign ())
+    (defun mml-secure-sign-pgp ())
+    (defun mml-secure-sign-pgpauto ())
+    (defun mml-secure-sign-pgpmime ())
+    (defun mml-secure-sign-smime ())
+    (defun mml-secure-encrypt ())
+    (defun mml-secure-encrypt-pgp ())
+    (defun mml-secure-encrypt-pgpauto ())
+    (defun mml-secure-encrypt-pgpmime ())
+    (defun mml-secure-encrypt-smime ())
 
-  (define-key notmuch-hello-mode-map "a"
-    (lambda ()
-      (interactive)
-      (notmuch-hello-search "tag:archive")))
-)
+    ;; Remove new interface bad format, we only want pgpmime
+    (defun mml-secure-message-sign ())
+    (defun mml-secure-message-sign-encrypt ())
+    (defun mml-secure-message-sign-pgp ())
+    (defun mml-secure-message-sign-pgpauto ())
+    (defun mml-secure-message-sign-smime ())
+    (defun mml-secure-message-encrypt ())
+    (defun mml-secure-message-encrypt-pgp ())
+    (defun mml-secure-message-encrypt-pgpauto ())
+    (defun mml-secure-message-encrypt-smime ())))
 #+END_SRC
 
 * Programming

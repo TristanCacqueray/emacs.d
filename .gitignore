@@ -14,3 +14,6 @@
 /projectile-bookmarks.eld
 /early-init.el
 /eshell/history
+/dovecot.conf
+/filter.sieve
+/notmuch-tag.py
