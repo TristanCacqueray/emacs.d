@@ -1288,6 +1288,7 @@ Linting
 (use-package js2-mode
   :config
   (setq-default
+    js-indent-level 2
     js2-strict-missing-semi-warning nil
   )
 )
