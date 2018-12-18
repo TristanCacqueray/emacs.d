@@ -665,7 +665,7 @@ different face
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
   :commands rainbow-delimiters-mode
-  :hook ((emacs-lisp-mode lisp-mode hy-mode clojure-mode cider-repl-mode) . rainbow-delimiters-mode))
+  :hook ((emacs-lisp-mode lisp-mode) . rainbow-delimiters-mode))
 #+END_SRC
 
 ** Editor
@@ -1287,7 +1287,12 @@ Linting
 
 ** Lisp
 #+BEGIN_SRC emacs-lisp :comments nil
-(use-package lisp-mode)
+(use-package elisp-mode
+  :config
+  (add-hook 'emacs-lisp-mode-hook (lambda ()
+    (message "el mode loaded :)")
+    (rainbow-delimiters-mode t)
+    (whitespace-mode -1))))
 #+END_SRC
 
 ** Javascript
