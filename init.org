@@ -1293,6 +1293,22 @@ Linting
     (message "el mode loaded :)")
     (rainbow-delimiters-mode t)
     (whitespace-mode -1))))
+
+(use-package scheme
+  :config
+  (setq scheme-program-name "~/.local/bin/mit-scheme"))
+
+;; Geiser is pretty heavy for now...
+(use-package geiser
+  :disabled t
+  :load-path "~/.emacs.d/lib/geiser/elisp/"
+  :mode "\\.scm\\'"
+  :bind ("C-x C-a" . geiser-eval-definition)
+  :config
+  (require 'geiser-install)
+  (setq
+    geiser-active-implementations '(mit)
+    geiser-mit-binary "~/.local/bin/mit-scheme"))
 #+END_SRC
 
 ** Javascript

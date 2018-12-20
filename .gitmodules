@@ -164,12 +164,18 @@
 [submodule "s"]
 	path = lib/s
 	url = git@github.com:magnars/s.el.git
+[submodule "scheme-complete"]
+	path = lib/scheme-complete
+	url = git@github.com:ashinn/scheme-complete.git
 [submodule "shut-up"]
 	path = lib/shut-up
 	url = git@github.com:cask/shut-up.git
 [submodule "simpleclip"]
 	path = lib/simpleclip
 	url = git@github.com:rolandwalker/simpleclip.git
+[submodule "smartparens"]
+	path = lib/smartparens
+	url = git@github.com:Fuco1/smartparens.git
 [submodule "smex"]
 	path = lib/smex
 	url = git@github.com:nonsequitur/smex.git
