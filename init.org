@@ -1317,6 +1317,20 @@ Linting
     geiser-mit-binary "~/.local/bin/mit-scheme"))
 #+END_SRC
 
+** Rust
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package rust-mode
+  :bind (("C-c C-c" . rust-compile)
+         ("C-c C-r" . rust-run)
+         ("C-c C-t" . rust-test)
+         ("C-c C-f" . rust-format-buffer))
+  :config
+  ;; Add run command
+
+  ;; Remove unused functions
+  (fmakunbound 'rust-playpen-buffer)
+  (fmakunbound 'rust-playpen-region))
+#+END_SRC
 ** Javascript
 #+BEGIN_SRC emacs-lisp
 (use-package js2-mode
