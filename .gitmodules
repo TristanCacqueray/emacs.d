@@ -134,6 +134,9 @@
 [submodule "ox-gfm"]
 	path = lib/ox-gfm
 	url = git@github.com:larstvei/ox-gfm.git
+[submodule "ox-hugo"]
+	path = lib/ox-hugo
+	url = git@github.com:kaushalmodi/ox-hugo.git
 [submodule "ox-rst"]
 	path = lib/ox-rst
 	url = git@github.com:msnoigrs/ox-rst.git

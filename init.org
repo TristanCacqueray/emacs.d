@@ -1078,6 +1078,12 @@ Replace evil search function "/" by swiper
 ;; reStructuredText
 (use-package ox-rst
   :after ox)
+
+;; Hugo blog posts
+(use-package ox-hugo
+  :after ox)
+(use-package ox-hugo-auto-export
+  :after ox-hugo)
 #+END_SRC
 *** Habit: special todo items for repeated task
 What’s really useful about habits is that they are displayed along with a
