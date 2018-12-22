@@ -980,6 +980,9 @@ Replace evil search function "/" by swiper
     ;; Tell org where are the files
     org-directory "~/org/"
 
+    ;; Display image inline
+    org-startup-with-inline-images t
+
     ;; Keep shift arrow to change buffer, not org info
     org-support-shift-select (quote always)
 
@@ -1008,6 +1011,32 @@ Replace evil search function "/" by swiper
     ;; Mail link description format, %c if from or to when sent by me
     org-email-link-description-format "Email %c (%d): %s"
     )
+
+  ;; Custom links
+  ;; http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
+  (defvar yt-iframe-format
+  ;; You may want to change your width and height.
+  (concat "<iframe width=\"560\""
+          " height=\"315\""
+          " src=\"https://www.youtube.com/embed/%s\""
+          " frameborder=\"0\""
+          " allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\""
+          " allowfullscreen></iframe>"))
+
+(org-add-link-type
+ "yt"
+ (lambda (handle)
+   (browse-url
+    (concat "https://www.youtube.com/embed/"
+            handle)))
+ (lambda (path desc backend)
+   (cl-case backend
+     (md (format yt-iframe-format
+                   path (or desc "")))
+     (html (format yt-iframe-format
+                   path (or desc "")))
+     (latex (format "\href{%s}{%s}"
+                    path (or desc "video"))))))
 
   ;; Custom func to load gtd file
   (defun gtd ()
