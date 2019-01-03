@@ -163,10 +163,10 @@ The use-package macro allows you to isolate package configuration in your
 (require 'use-package)
 
 ;; For the :bind keyword
-(use-package bind-key :defer t)
+(use-package bind-key)
 
 ;; For the :diminish keyword, to replace mode names in modeline
-(use-package diminish :defer t)
+(use-package diminish)
 #+END_SRC
 
 *** Epkg
