@@ -1109,6 +1109,15 @@ Replace evil search function "/" by swiper
 (use-package ox-hugo-auto-export
   :after ox-hugo)
 #+END_SRC
+*** Set a dark background for source blocks
+#+BEGIN_SRC emacs-lisp
+  (require 'color)
+  (if (display-graphic-p)
+      (set-face-attribute 'org-block nil :background
+                          (color-darken-name
+                           (face-attribute 'default :background) 2)))
+
+#+END_SRC
 *** Habit: special todo items for repeated task
 What’s really useful about habits is that they are displayed along with a
 consistency graph, to show how consistent you’ve been at getting that
