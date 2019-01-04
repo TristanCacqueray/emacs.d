@@ -1369,6 +1369,21 @@ Linting
   (fmakunbound 'rust-playpen-buffer)
   (fmakunbound 'rust-playpen-region))
 #+END_SRC
+** Go
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package go-mode
+  :mode "\\.go\\'"
+  :hook (go-mode . go-setup))
+;; Some go buffer local setup
+(defun go-setup ()
+  (setq tab-width 2)
+  ;; Set compile command by default to 'go run ....'
+  (setq-local compile-command (concat "go run " (shell-quote-argument buffer-file-name)))
+  ;; gofmt on save
+  (add-hook 'before-save-hook 'gofmt-before-save nil t)
+  ;; stop whitespace being highlighted
+  (whitespace-toggle-options '(tabs tab-mark)))
+#+END_SRC
 ** Javascript
 #+BEGIN_SRC emacs-lisp
 (use-package js2-mode
