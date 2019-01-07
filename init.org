@@ -877,6 +877,9 @@ Replace evil search function "/" by swiper
   ;; projectile-find-files will be much faster for large projects.
   ;; C-u C-c p f to clear cache before search.
   (setq-default
+    ;; Start magit-status when switching project
+    projectile-switch-project-action (quote magit-status)
+
     ;; Don't show "Projectile" as liter when not in a project
     projectile-mode-line-prefix ""
     ;; Cache management
