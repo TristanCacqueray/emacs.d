@@ -824,6 +824,8 @@ Replace evil search function "/" by swiper
   :diminish
   :config
   (setq
+    ;; Always case insensitive search
+    ivy-case-fold-search-default (quote always)
     ;; Extend searching to bookmarks and recentf
     ivy-use-virtual-buffers t
     ;; does not count candidates
