@@ -229,7 +229,7 @@ Use the solarized dark theme without bolding or text scaling.
 (load-theme 'solarized-dark t)
 #+END_SRC
 
-Use the Inconsolata font and enable font size change.
+Use the Inconsolata font.
 #+BEGIN_SRC emacs-lisp :comments nil
 (set-frame-font "Inconsolata 14")
 #+END_SRC
@@ -1474,8 +1474,6 @@ I miss that from Vim
 
 * TODOs
 ** TODO Fix the above inlined TODOs
-** TODO Make magit sign-off commits
-** TODO Improve org usage
 ** TODO Configure yassnippet and abbrev mode
 ** TODO Look at company-mode and enable it
 ** TODO Look for paren bug: (>) doesn't match properly...
