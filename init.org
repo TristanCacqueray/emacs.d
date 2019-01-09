@@ -749,6 +749,29 @@ Helpful is a replacement for ~*help*~ buffers that provides much more contextual
          ("C-h k" . helpful-key)))
 #+END_SRC
 
+*** keyfreq: record command frequencies
+TODO: write a script to show daily/weekly/monthly stats.
+#+BEGIN_SRC emacs-lisp
+(use-package keyfreq
+  :config
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1)
+
+  ;; Archive keyfreq daily for statistic purpose...
+  (defun my/archivekeyfreq ()
+    "Function to archive keyfreq daily"
+    (unless (file-exists-p "~/.emacs-freqs")
+        (make-directory "~/.emacs-freqs"))
+    (let ((daily-file (concat "~/.emacs-freqs/dump-" (format-time-string "%F") ".json")))
+      (unless (file-exists-p daily-file)
+        (keyfreq-json daily-file)))
+    (message "%s: ran archivekeyfreq" (current-time-string )))
+  ;; Archive on start
+  (my/archivekeyfreq)
+  ;; And every hour
+  (run-at-time "05:00" (* 3600 24) #'my/archivekeyfreq))
+  ;; (list-timers)
+#+END_SRC
 ** Evil: vim mode and bindings
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package evil
