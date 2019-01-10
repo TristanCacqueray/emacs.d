@@ -60,6 +60,9 @@
 [submodule "evil"]
 	path = lib/evil
 	url = git@github.com:emacs-evil/evil.git
+[submodule "evil-collection"]
+	path = lib/evil-collection
+	url = git@github.com:emacs-evil/evil-collection.git
 [submodule "evil-leader"]
 	path = lib/evil-leader
 	url = git@github.com:cofi/evil-leader.git

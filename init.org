@@ -752,6 +752,9 @@ Helpful is a replacement for ~*help*~ buffers that provides much more contextual
 ** Evil: vim mode and bindings
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package evil
+  :init
+  ;; (setq evil-want-integration t)
+  ;; (setq evil-want-keybinding nil)
   :config
   (progn
     ;; stop messing with clipboard please
@@ -772,6 +775,17 @@ Helpful is a replacement for ~*help*~ buffers that provides much more contextual
     (evil-mode +1)
   )
 )
+#+END_SRC
+
+Enable evil binding for all the mods. Disabled for now...
+
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package evil-collection
+  :after evil
+  :disabled t
+  :ensure t
+  :config
+  (evil-collection-init))
 #+END_SRC
 
 Enable Vim command such as ":vsp"
