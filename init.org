@@ -1351,6 +1351,7 @@ import time
 import notmuch
 import argparse
 import logging
+import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--debug", action="store_true")
@@ -1459,6 +1460,8 @@ def process(msg):
     elif "calendar-notification" in mail_from:
         tags.add("calendar")
         tags.add("-to-me")
+        if subject == "you have no events scheduled today.":
+            tags.add("-unread")
     elif "no-reply@taiga.io" in mail_from:
         tags.add("bug")
         tags.add("-to-me")
@@ -1476,7 +1479,8 @@ def process(msg):
             # Mark CI results as read
             tags.add("-unread")
         elif msg.get_header("X-Gerrit-MessageType") == "comment":
-            if "comments)\n" not in body or "\nrecheck\n" in body:
+            if re.search("patch set [0-9]+: .*\n\n--\nto view", body) or \
+               "\nrecheck\n" in body:
                 tags.add("-unread")
     elif gh_sender:
         tags.add("code")
@@ -1535,8 +1539,6 @@ def process(msg):
             tags.add("watched")
 
     if "calendar-notification" in mail_sender:
-        if subject == "you have no events scheduled today.":
-            tags.add("-unread")
         tags.add("-to-me")
         tags.add("calendar")
 
@@ -1563,7 +1565,7 @@ def process(msg):
         tags.add('watched')
 
     # Add unseen tag for new threads
-    if "-unread" not in tags and \
+    if "-unread" not in tags and "watched" not in tags and \
        tags.intersection(set(("list", "code", "bug", "vmt"))):
         qunseen = notmuch.Query(db, 'thread:%s and ('
             'tag:inbox or tag:unseen or tag:watched or tag:ignored or '
