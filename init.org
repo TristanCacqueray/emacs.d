@@ -673,7 +673,7 @@ different face
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
   :commands rainbow-delimiters-mode
-  :hook ((emacs-lisp-mode lisp-mode) . rainbow-delimiters-mode))
+  :hook ((emacs-lisp-mode lisp-mode hy-mode) . rainbow-delimiters-mode))
 #+END_SRC
 
 ** Editor
@@ -2030,6 +2030,9 @@ Linting
 (use-package scheme
   :config
   (setq scheme-program-name "~/.local/bin/mit-scheme"))
+
+(use-package hy-mode
+  :mode "\\.hy\\'")
 
 ;; Geiser is pretty heavy for now...
 (use-package geiser

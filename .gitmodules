@@ -99,6 +99,9 @@
 [submodule "hl-todo"]
 	path = lib/hl-todo
 	url = git@github.com:tarsius/hl-todo.git
+[submodule "hy-mode"]
+	path = lib/hy-mode
+	url = git@github.com:hylang/hy-mode.git
 [submodule "ivy"]
 	path = lib/ivy
 	url = git@github.com:abo-abo/swiper.git
