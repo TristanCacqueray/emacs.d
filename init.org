@@ -1022,107 +1022,158 @@ Replace evil search function "/" by swiper
 
 * Org mode
 ** General Setup
+Workflow is vastly inspired by http://doc.norang.ca/org-mode.html
 #+BEGIN_SRC emacs-lisp :comments nil
-(use-package org
-  :config
-  (setq-default
-    ;; Tell org where are the files
-    org-directory "~/org/"
+    (use-package org
+      :config
+      (setq-default
+        ;; Tell org where are the files
+        org-directory "~/org/"
 
-    ;; Display image inline
-    org-startup-with-inline-images t
+        ;; Display image inline
+        org-startup-with-inline-images t
 
-    ;; Keep shift arrow to change buffer, not org info
-    org-support-shift-select (quote always)
+        ;; Ensure shift arrows execute org commands, e.g. change todo state.
+        org-support-shift-select nil
 
-    ;; Insead of "..." show "…" when there's hidden folded content
-    ;; Some characters to choose from: …, ⤵, ▼, ↴, ⬎, ⤷, and ⋱
-    org-ellipsis "⤵"
+        ;; Insead of "..." show "…" when there's hidden folded content
+        ;; Some characters to choose from: …, ⤵, ▼, ↴, ⬎, ⤷, and ⋱
+        org-ellipsis "⤵"
 
-    ;; Show headings up to level 2 by default when opening an org files
-    org-startup-folded 'content
+        ;; Show headings up to level 2 by default when opening an org files
+        org-startup-folded 'content
 
-    ;; TODO what is this?
-    org-startup-indented t
-    org-src-fontify-natively t
-    org-startup-indented t
-    org-log-done t
-    org-clock-persist-query-save t
-    org-adapt-indentation nil
-    org-log-done 'time
+        ;; Simple TODO sequence
+        org-todo-keywords (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+                                  (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+        org-todo-keyword-faces (quote (("TODO" :foreground "red" :weight bold)
+                                       ("NEXT" :foreground "blue" :weight bold)
+                                       ("DONE" :foreground "forest green" :weight bold)
+                                       ("WAITING" :foreground "orange" :weight bold)
+                                       ("HOLD" :foreground "magenta" :weight bold)
+                                       ("CANCELLED" :foreground "forest green" :weight bold)))
+        ;; Change state using C-c C-t
+        org-use-fast-todo-selection t
+        ;; But don't bother with notes when using shift arrows
+        org-treat-S-cursor-todo-selection-as-state-change nil
+        ;; Auto tag task
+        org-todo-state-tags-triggers (quote (("CANCELLED" ("CANCELLED" . t))
+                                             ("WAITING" ("WAITING" . t))
+                                             ("HOLD" ("WAITING") ("HOLD" . t))
+                                             (done ("WAITING") ("HOLD"))
+                                             ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
+                                             ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
+                                             ("DONE" ("WAITING") ("CANCELLED") ("HOLD"))))
 
-    ;; Show inline images by default
-    org-startup-with-inline-images t
+        ;; TODO what is this?
+        org-startup-indented t
+        org-src-fontify-natively t
+        org-startup-indented t
+        org-log-done t
+        org-clock-persist-query-save t
+        org-adapt-indentation nil
+        org-log-done 'time
 
-    ;; Only show one star, though this is overridden by org-bullets
-    org-hide-leading-stars t
+        ;; Show inline images by default
+        org-startup-with-inline-images t
 
-    ;; Mail link description format, %c if from or to when sent by me
-    org-email-link-description-format "Email %c (%d): %s"
-    )
+        ;; Only show one star, though this is overridden by org-bullets
+        org-hide-leading-stars t
 
-  ;; Custom links
-  ;; http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
-  (defvar yt-iframe-format
-  ;; You may want to change your width and height.
-  (concat "<iframe width=\"560\""
-          " height=\"315\""
-          " src=\"https://www.youtube.com/embed/%s\""
-          " frameborder=\"0\""
-          " allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\""
-          " allowfullscreen></iframe>"))
+        ;; Mail link description format, %c if from or to when sent by me
+        org-email-link-description-format "Email %c (%d): %s"
+        )
 
-(org-add-link-type
- "yt"
- (lambda (handle)
-   (browse-url
-    (concat "https://www.youtube.com/embed/"
-            handle)))
- (lambda (path desc backend)
-   (cl-case backend
-     (md (format yt-iframe-format
-                   path (or desc "")))
-     (html (format yt-iframe-format
-                   path (or desc "")))
-     (latex (format "\href{%s}{%s}"
-                    path (or desc "video"))))))
+      ;; Custom links
+      ;; http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
+      (defvar yt-iframe-format
+      ;; You may want to change your width and height.
+      (concat "<iframe width=\"560\""
+              " height=\"315\""
+              " src=\"https://www.youtube.com/embed/%s\""
+              " frameborder=\"0\""
+              " allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\""
+              " allowfullscreen></iframe>"))
+
+    (org-add-link-type
+     "yt"
+     (lambda (handle)
+       (browse-url
+        (concat "https://www.youtube.com/embed/"
+                handle)))
+     (lambda (path desc backend)
+       (cl-case backend
+         (md (format yt-iframe-format
+                       path (or desc "")))
+         (html (format yt-iframe-format
+                       path (or desc "")))
+         (latex (format "\href{%s}{%s}"
+                        path (or desc "video"))))))
 
 
-  )
+      )
 #+END_SRC
 
 ** Org Packages
 *** Capture: quickly capture informations from anywhere
 #+BEGIN_SRC emacs-lisp
-(use-package org-capture
-  :bind ("C-c c" . org-capture)
-  :config
-  (setq org-capture-templates
-    '(
-      ("t" "Todo" entry (file+headline "gtd.org.gpg" "Inbox")
-       "* TODO %?\n  %i\n  %a\nAdded: %U")
-      ("m" "Meeting" entry (file "agenda.org.gpg")
-       "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-      ("j" "Journal" entry (file+datetree "journal.org.gpg")
-       "* %?\nEntered on %U\n  %i\n  %a")
+  (use-package org-capture
+    :bind ("C-c c" . org-capture)
+    :config
+    (setq-default
+     org-default-notes-file "~/org/refile.org.gpg"
+     org-capture-templates '(
+                             ("t" "todo" entry (file "~/org/refile.org.gpg")
+                              "* TODO %? %a\n%U\n")
+                             ("m" "Meeting" entry (file "agenda.org.gpg")
+                              "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+                             ("j" "Journal" entry (file+datetree "journal.org.gpg")
+                              "* %?\nEntered on %U\n  %i\n  %a")
+                             )
+     ;; Use any org-agendas file as refile target, only first level
+     org-refile-targets (quote ((nil :maxlevel . 1)
+                                (org-agenda-files :maxlevel . 1)))
+     ;; Use full outline paths for refile targets
+     org-refile-use-outline-path t
+     ;; Targets complete directly
+     org-outline-path-complete-in-steps nil
+     ;; Don't refile in gcal file
+     org-refile-target-verify-function
+     (lambda () (not (or (string= (file-name-nondirectory (buffer-file-name)) "gcal.org")
+                    (string= (file-name-nondirectory (buffer-file-name)) "prodchain.org"))))
      )
-  )
-)
+    )
 #+END_SRC
 *** Agenda: show agenda with scheduled todos
 #+BEGIN_SRC emacs-lisp
 (use-package org-agenda
-  :bind ("C-c a"   . org-agenda)
+  :bind ("<f12>"   . org-agenda)
   :config
   (setq-default
     ;; Start agenda at today
     org-agenda-start-on-weekday nil
     ;; Look for agenda item in every org files
     org-agenda-files '("~/org")
-    ;; Match those files
+    ;; Match encrypted files too
     org-agenda-file-regexp "\\`[^.].*\\.org\\(.gpg\\)?\\'"
-   )
-)
+    ;; Do not dim blocked tasks
+    org-agenda-dim-blocked-tasks nil
+    ;; Compact the block agenda view
+    org-agenda-compact-blocks t
+    ;; Customize view
+    org-agenda-custom-commands
+      (quote (("N" "Notes" tags "NOTE"
+               ((org-agenda-overriding-header "Notes")
+                (org-tags-match-list-sublevels t)))
+              ("h" "Habits" tags-todo "STYLE=\"habit\""
+               ((org-agenda-overriding-header "Habits")
+                (org-agenda-sorting-strategy
+                 '(todo-state-down effort-up category-keep))))
+              (" " "Agenda"
+               ((agenda "" nil)
+                (tags "REFILE"
+                      ((org-agenda-overriding-header "Tasks to Refile")
+                       (org-tags-match-list-sublevels nil)))))))))
 #+END_SRC
 *** Bullet: replace star with utf-8 bullets
 #+BEGIN_SRC emacs-lisp
