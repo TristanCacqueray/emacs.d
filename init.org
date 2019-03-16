@@ -395,6 +395,19 @@ The file content shall be assimilated in the main configuration if relevant.
     (load custom-file)))
 #+END_SRC
 
+** Mode-line-format: remove modes
+Minor and major modes clutter the status bar, I'd rather use C-h m to get the list when needed.
+Note that this makes diminish useless.
+#+BEGIN_SRC emacs-lisp
+(setq-default mode-line-format
+  '("%e"
+   mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified
+   mode-line-auto-compile mode-line-remote
+   mode-line-frame-identification mode-line-buffer-identification "   "
+   mode-line-position evil-mode-line-tag mode-line-misc-info mode-line-end-spaces
+))
+#+END_SRC
+
 ** Dash: A modern list library for Emacs
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package dash
