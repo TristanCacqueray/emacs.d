@@ -738,6 +738,14 @@ These are minor modes to selectively hide/show code and comment blocks
          ([backtab] . bicycle-cycle-global)))
 #+END_SRC
 
+*** Smartparens: smarter parenthesis mode
+#+BEGIN_SRC emacs-lisp
+(use-package smartparens
+  :config
+  (require 'smartparens-config)
+  (smartparens-global-mode))
+#+END_SRC
+
 *** Company: Auto completion
 #+BEGIN_SRC emacs-lisp
 (use-package company
