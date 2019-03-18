@@ -1152,8 +1152,7 @@ Workflow is vastly inspired by http://doc.norang.ca/org-mode.html
                               "* %?\nEntered on %U\n  %i\n  %a")
                              )
      ;; Use any org-agendas file as refile target, only first level
-     org-refile-targets (quote ((nil :maxlevel . 1)
-                                (org-agenda-files :maxlevel . 1)))
+     org-refile-targets '((org-agenda-files :maxlevel . 1))
      ;; Use full outline paths for refile targets
      org-refile-use-outline-path t
      ;; Targets complete directly
