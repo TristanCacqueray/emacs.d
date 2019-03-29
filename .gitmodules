@@ -57,6 +57,9 @@
 [submodule "epkg"]
 	path = lib/epkg
 	url = git@github.com:emacscollective/epkg.git
+[submodule "esxml"]
+	path = lib/esxml
+	url = git@github.com:tali713/esxml.git
 [submodule "evil"]
 	path = lib/evil
 	url = git@github.com:emacs-evil/evil.git
@@ -134,6 +137,9 @@
 	build-step = make
 	build-step = make sphinx-texinfo
         build-step = borg-makeinfo
+[submodule "nov"]
+	path = lib/nov
+	url = git@github.com:wasamasa/nov.el.git
 [submodule "nyan-mode"]
 	path = lib/nyan-mode
 	url = git@github.com:TeMPOraL/nyan-mode.git

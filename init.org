@@ -1044,6 +1044,12 @@ Replace evil search function "/" by swiper
 
 #+END_SRC
 
+** Nov: epub reader
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package nov-mode
+  :defer t
+  :mode "\\.epub\\'")
+#+END_SRC
 * Org mode
 ** General Setup
 Workflow is vastly inspired by http://doc.norang.ca/org-mode.html
