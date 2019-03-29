@@ -800,6 +800,7 @@ TODO: write a script to show daily/weekly/monthly stats.
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package evil
   :init
+  :disabled t
   ;; (setq evil-want-integration t)
   ;; (setq evil-want-keybinding nil)
   :config
@@ -839,6 +840,7 @@ Enable Vim command such as ":vsp"
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package evil-leader
   :after evil
+  :disabled t
   :config
   (global-evil-leader-mode))
 #+END_SRC
@@ -874,7 +876,8 @@ Replace evil search function "/" by swiper
 (use-package swiper
   :bind (("M-s" . swiper))
   :config
-  (define-key evil-normal-state-map "/" 'swiper))
+  ;(define-key evil-normal-state-map "/" 'swiper)
+)
 #+END_SRC
 
 *** Ivy: Incremental completYon
@@ -2189,8 +2192,8 @@ I miss that from Vim
         (error "No number at point"))
     (replace-match (number-to-string (- (string-to-number (match-string 0)) 1))))
 
-  (define-key evil-normal-state-map "+" 'increment-number-at-point)
-  (define-key evil-normal-state-map "-" 'decrement-number-at-point)
+  ;(define-key evil-normal-state-map "+" 'increment-number-at-point)
+  ;(define-key evil-normal-state-map "-" 'decrement-number-at-point)
 #+END_SRC
 
 ** Move files more intuitively
