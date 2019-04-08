@@ -1559,7 +1559,7 @@ def process(msg):
             if re.search("patch set [0-9]+: .*\n\n--\nto view", body) or \
                "\nrecheck\n" in body:
                 tags.add("-unread")
-        else:
+        elif msg.get_header("X-Message-Type") != "newchange":
             tags.add("-unread")
     elif gh_sender:
         tags.add("code")
