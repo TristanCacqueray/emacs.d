@@ -165,28 +165,38 @@ these to the ~/.gitignore_global file:
 The use-package macro allows you to isolate package configuration in your
 .emacs file in a way that is both performance-oriented and, well, tidy.
 #+BEGIN_SRC emacs-lisp
-(require 'use-package)
+  (require 'use-package)
 
-;; General key binding
-(use-package general
-  :config
-  (general-override-mode 1)
-  (general-create-definer tyrant-def
-    :states '(normal visual insert motion emacs)
-    :prefix "SPC"
-    :non-normal-prefix "C-SPC")
-  (tyrant-def
-    ""  nil
-    "c" (general-simulate-key "C-c")
-    "h" (general-simulate-key "C-h")
-    "u" (general-simulate-key "C-u")
-    "x" (general-simulate-key "C-x")))
+  ;; General key binding
+  (use-package general
+    :config
+    (general-override-mode 1)
+    (general-create-definer tyrant-def
+      :states '(normal visual insert motion emacs)
+      :prefix "SPC"
+      :non-normal-prefix "C-SPC")
+    (tyrant-def
+      ""  nil
+      "c" (general-simulate-key "C-c")
+      "h" (general-simulate-key "C-h")
+      "u" (general-simulate-key "C-u")
+      "x" (general-simulate-key "C-x")
 
-;; For the :bind keyword
-(use-package bind-key)
+      ;; Buffer operations
+      "b"   '(:ignore t :which-key "buffer")
+      "bb"  'mode-line-other-buffer
+      "bd"  'kill-this-buffer
+      "b]"  'next-buffer
+      "b["  'previous-buffer
+      "bq"  'kill-buffer-and-window
+      "bR"  'rename-file-and-buffer
+      "br"  'revert-buffer))
 
-;; For the :diminish keyword, to replace mode names in modeline
-(use-package diminish)
+  ;; For the :bind keyword
+  (use-package bind-key)
+
+  ;; For the :diminish keyword, to replace mode names in modeline
+  (use-package diminish)
 #+END_SRC
 
 *** Epkg
