@@ -874,20 +874,23 @@ Enable Vim command such as ":vsp"
 
 *** Counsel
 #+BEGIN_SRC emacs-lisp
-(use-package counsel
-  :diminish
-  :bind (("C-x C-f" . counsel-find-file)
-         ("M-y"     . counsel-yank-pop)
-         ("M-i"     . counsel-imenu)
-         ("M-x"     . counsel-M-x))
-  :config
-  ;; Hide pyc and elc files by default from `counsel-find-file'
-  (setq counsel-find-file-ignore-regexp "\\.\\(pyc\\|elc\\)\\'")
-  ;; Add action to open file literally
-  ;; This makes opening of files with minified js or sql dumps possible.
-  (ivy-add-actions 'counsel-find-file
-                   `(("l" find-file-literally "Open literally")))
-  (counsel-mode 1))
+  (use-package counsel
+    :diminish
+    :bind (("C-x C-f" . counsel-find-file)
+           ("M-y"     . counsel-yank-pop)
+           ("M-i"     . counsel-imenu)
+           ("M-x"     . counsel-M-x))
+    :config
+    ;; Hide pyc and elc files by default from `counsel-find-file'
+    (setq counsel-find-file-ignore-regexp "\\.\\(pyc\\|elc\\)\\'")
+    ;; Add action to open file literally
+    ;; This makes opening of files with minified js or sql dumps possible.
+    (ivy-add-actions 'counsel-find-file
+                     `(("l" find-file-literally "Open literally")))
+    (counsel-mode 1)
+    :general
+    (tyrant-def
+      "SPC" '(counsel-M-x :which-key "M-x")))
 #+END_SRC
 
 *** Swiper: Search with ivy
