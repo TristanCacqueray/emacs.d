@@ -857,14 +857,6 @@ Enable evil binding for all the mods. Disabled for now...
   (evil-collection-init))
 #+END_SRC
 
-Enable Vim command such as ":vsp"
-#+BEGIN_SRC emacs-lisp :comments nil
-(use-package evil-leader
-  :after evil
-  :config
-  (global-evil-leader-mode))
-#+END_SRC
-
 ** Ivy
 *** Smex: fuzzy matching for M-x
 #+BEGIN_SRC emacs-lisp
