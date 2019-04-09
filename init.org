@@ -647,9 +647,12 @@ all of the available key bindings that follow C-x (or as many as space allows
 given your settings). This includes prefixes like C-x 8 which are shown in a
 different face
 #+BEGIN_SRC emacs-lisp
-(use-package which-key
-  :diminish
-  :config (which-key-mode 1))
+  (use-package which-key
+    :diminish
+    :config
+    (setq which-key-separator " "
+          which-key-prefix-prefix "+")
+    :config (which-key-mode 1))
 #+END_SRC
 
 *** which-func: Show the name of the current function definition in the modeline
