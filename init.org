@@ -167,6 +167,9 @@ The use-package macro allows you to isolate package configuration in your
 #+BEGIN_SRC emacs-lisp
 (require 'use-package)
 
+;; General key binding
+(use-package general)
+
 ;; For the :bind keyword
 (use-package bind-key)
 
