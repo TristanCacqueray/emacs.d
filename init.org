@@ -169,7 +169,6 @@ The use-package macro allows you to isolate package configuration in your
 
 ;; General key binding
 (use-package general
-  :after which-key
   :config
   (general-override-mode 1)
   (general-create-definer tyrant-def
@@ -649,7 +648,6 @@ given your settings). This includes prefixes like C-x 8 which are shown in a
 different face
 #+BEGIN_SRC emacs-lisp
 (use-package which-key
-  :defer 10
   :diminish
   :config (which-key-mode 1))
 #+END_SRC
@@ -814,30 +812,35 @@ TODO: write a script to show daily/weekly/monthly stats.
 #+END_SRC
 ** Evil: vim mode and bindings
 #+BEGIN_SRC emacs-lisp :comments nil
-(use-package evil
-  :init
-  ;; (setq evil-want-integration t)
-  ;; (setq evil-want-keybinding nil)
-  :config
-  (progn
-    ;; stop messing with clipboard please
-    (evil-define-operator evil-destroy (beg end type register yank-handler)
-      (evil-delete beg end type ?_ yank-handler))
-    (evil-define-operator evil-destroy-replace (beg end type register yank-handler)
-      (evil-destroy beg end type register yank-handler)
-      (evil-paste-before 1 register))
+  (use-package evil
+    :init
+    ;; (setq evil-want-integration t)
+    ;; (setq evil-want-keybinding nil)
+    :hook (after-init . evil-mode)
+    :config
+    (progn
+      ;; stop messing with clipboard please
+      (evil-define-operator evil-destroy (beg end type register yank-handler)
+        (evil-delete beg end type ?_ yank-handler))
+      (evil-define-operator evil-destroy-replace (beg end type register yank-handler)
+        (evil-destroy beg end type register yank-handler)
+        (evil-paste-before 1 register))
 
-    ;; Make evil undo only one char at a time
-    (advice-add 'undo-auto--last-boundary-amalgamating-number
-      :override #'ignore)
-    (setq evil-want-fine-undo t)
+      ;; Make evil undo only one char at a time
+      (advice-add 'undo-auto--last-boundary-amalgamating-number
+                  :override #'ignore)
+      (setq evil-want-fine-undo t)
 
-    ;; TODO: check what is this :)
-    (add-hook 'with-editor-mode-hook 'evil-insert-state)
-    ;; Activate evil
-    (evil-mode +1)
-  )
-)
+      ;; TODO: check what is this :)
+      (add-hook 'with-editor-mode-hook 'evil-insert-state))
+    :general
+    (tyrant-def
+      "wh"  'evil-window-left
+      "wl"  'evil-window-right
+      "wj"  'evil-window-down
+      "wk"  'evil-window-up
+      "bN"  'evil-buffer-new
+      "fd"  'evil-save-and-close))
 #+END_SRC
 
 Enable evil binding for all the mods. Disabled for now...
@@ -2211,8 +2214,8 @@ I miss that from Vim
         (error "No number at point"))
     (replace-match (number-to-string (- (string-to-number (match-string 0)) 1))))
 
-  (define-key evil-normal-state-map "+" 'increment-number-at-point)
-  (define-key evil-normal-state-map "-" 'decrement-number-at-point)
+  ;;(define-key evil-normal-state-map "+" 'increment-number-at-point)
+  ;;(define-key evil-normal-state-map "-" 'decrement-number-at-point)
 #+END_SRC
 
 ** Move files more intuitively
