@@ -168,7 +168,20 @@ The use-package macro allows you to isolate package configuration in your
 (require 'use-package)
 
 ;; General key binding
-(use-package general)
+(use-package general
+  :after which-key
+  :config
+  (general-override-mode 1)
+  (general-create-definer tyrant-def
+    :states '(normal visual insert motion emacs)
+    :prefix "SPC"
+    :non-normal-prefix "C-SPC")
+  (tyrant-def
+    ""  nil
+    "c" (general-simulate-key "C-c")
+    "h" (general-simulate-key "C-h")
+    "u" (general-simulate-key "C-u")
+    "x" (general-simulate-key "C-x")))
 
 ;; For the :bind keyword
 (use-package bind-key)
