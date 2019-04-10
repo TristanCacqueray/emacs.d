@@ -935,15 +935,23 @@ Replace evil search function "/" by swiper
 
 ** Magit
 #+BEGIN_SRC emacs-lisp :comments nil
-(use-package magit
-  :defer t
-  :bind ("C-x g"   . magit-status)
-  :config
-  (setq magit-push-always-verify nil)
-  (magit-add-section-hook 'magit-status-sections-hook
-                          'magit-insert-modules
-                          'magit-insert-stashes
-                          'append))
+  (use-package magit
+    :commands (magit-status)
+    :config
+    (setq magit-push-always-verify nil)
+    (magit-add-section-hook 'magit-status-sections-hook
+                            'magit-insert-modules
+                            'magit-insert-stashes
+                            'append)
+    (use-package evil-magit)
+    :general
+    (tyrant-def
+      "g"   '(:ignore t :which-key "git")
+      "gs" 'magit-status))
+
+  ;(use-package evil-magit
+  ;  :after magit)
+    ;; :hook (magit-mode . evil-magit-init))
 #+END_SRC
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package diff-hl
