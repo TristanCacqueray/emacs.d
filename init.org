@@ -1921,7 +1921,7 @@ I use notmuch-hello mode to browse, manage and compose mails:
 
     ;; Send with msmtp
     message-send-mail-function 'message-send-mail-with-sendmail
-    sendmail-program "/usr/share/msmtp/msmtpqueue/msmtp-enqueue.sh"
+    sendmail-program "/usr/share/doc/msmtp/scripts/msmtpqueue/msmtp-enqueue.sh"
     message-sendmail-f-is-evil nil
 
     ;; Get sending mail error
