@@ -254,9 +254,9 @@ Use the solarized dark theme without bolding or text scaling.
 (load-theme 'solarized-dark t)
 #+END_SRC
 
-Use the Inconsolata font.
+Use the Hack font.
 #+BEGIN_SRC emacs-lisp :comments nil
-(set-frame-font "Inconsolata 14")
+(set-frame-font "Hack 14")
 #+END_SRC
 
 * Personal Information
