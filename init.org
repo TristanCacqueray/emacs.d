@@ -1587,6 +1587,7 @@ def process(msg):
         tags.add("-to-me")
         if " ci (code review)" in mail_from or \
            "zuul (code review)" in mail_from or \
+           "zuul osp sf (code review)" in mail_from or \
            "jenkins (code review)" in mail_from:
             # Mark CI results as read
             tags.add("-unread")
