@@ -2089,6 +2089,12 @@ Linting
     flycheck-python-mypy-cache-dir "~/.mypy-cache")
 )
 #+END_SRC
+
+** Haskell
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package haskell-mode)
+#+END_SRC
+
 ** RPM
 #+BEGIN_SRC emacs-lisp
 (use-package rpm-spec-mode)

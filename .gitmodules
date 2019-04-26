@@ -84,6 +84,9 @@
 [submodule "flycheck"]
 	path = lib/flycheck
 	url = git@github.com:flycheck/flycheck.git
+[submodule "flymake"]
+	path = lib/flymake
+	url = git@github.com:emacsmirror/flymake.git
 [submodule "general"]
 	path = lib/general
 	url = git@github.com:noctuid/general.el.git
@@ -99,6 +102,9 @@
 [submodule "go-mode"]
 	path = lib/go-mode
 	url = git@github.com:dominikh/go-mode.el.git
+[submodule "haskell-mode"]
+	path = lib/haskell-mode
+	url = git@github.com:haskell/haskell-mode.git
 [submodule "helpful"]
 	path = lib/helpful
 	url = git@github.com:Wilfred/helpful.git
