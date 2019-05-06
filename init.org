@@ -2057,7 +2057,15 @@ Linting
 
 ** Haskell
 #+BEGIN_SRC emacs-lisp :comments nil
-(use-package haskell-mode)
+(use-package haskell-mode
+  :bind ((:map haskell-mode-map
+           ("<f8>" . haskell-navigate-imports)))
+  :config
+  (add-hook 'haskell-mode-hook
+          (lambda ()
+            (set (make-local-variable 'company-backends)
+                 (append '((company-capf company-dabbrev-code))
+                         company-backends)))))
 #+END_SRC
 
 ** RPM
