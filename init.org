@@ -45,7 +45,7 @@ Emacs is loading certain packages.
 Show required package that takes more than 1ms to load.
 Remove ":tangle no" to enable.
 TODO: enable this only when interactive and remove tangle no switch
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (defadvice require (around my-require activate)
   (let ((start (current-time))
         res delta)
@@ -723,8 +723,7 @@ different face
   :config
   (setq undo-tree-visualizer-timestamps t)
   (setq undo-tree-visualizer-diff t)
-  (global-undo-tree-mode)
-)
+  (global-undo-tree-mode))
 #+END_SRC
 
 *** Automatically remove trailing whitespace (only if I put them there)
