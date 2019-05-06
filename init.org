@@ -603,17 +603,15 @@ Comint mode is a package that defines a general command-interpreter-in-a-buffer.
 #+BEGIN_SRC emacs-lisp
 (use-package nyan-mode
   :config
-  (nyan-mode)
-  )
+  (nyan-mode))
 #+END_SRC
 
 *** Eldoc: Display help
 #+BEGIN_SRC emacs-lisp
 (use-package eldoc
-  ;; :hook (prog-mode . eldoc-mode)
+  :hook (prog-mode . eldoc-mode)
   :config
-  ;; Seems to bug with split evil window or something, disabled for now
-  (global-eldoc-mode -1))
+  (global-eldoc-mode))
 #+END_SRC
 
 *** Hl-todo: Highlight and navigate TODO keywords
