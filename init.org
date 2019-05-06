@@ -846,17 +846,6 @@ TODO: write a script to show daily/weekly/monthly stats.
       (add-hook 'with-editor-mode-hook 'evil-insert-state))
 #+END_SRC
 
-Enable evil binding for all the mods. Disabled for now...
-
-#+BEGIN_SRC emacs-lisp :comments nil
-(use-package evil-collection
-  :after evil
-  :disabled t
-  :ensure t
-  :config
-  (evil-collection-init))
-#+END_SRC
-
 ** Ivy
 *** Smex: fuzzy matching for M-x
 #+BEGIN_SRC emacs-lisp
