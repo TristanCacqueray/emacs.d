@@ -460,7 +460,10 @@ Note that this makes diminish useless.
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package recentf
   :demand t
-  :config (add-to-list 'recentf-exclude "^/\\(?:ssh\\|su\\|sudo\\)?:"))
+  :config
+  (add-to-list 'recentf-exclude "^/\\(?:ssh\\|su\\|sudo\\)?:")
+  (setq-default
+    recentf-max-saved-items 128))
 #+END_SRC
 
 ** Auto-revert: Revert buffer when file changes on disk
