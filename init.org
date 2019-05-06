@@ -523,8 +523,7 @@ Note that this makes diminish useless.
 ** Ansi-color
 #+BEGIN_SRC emacs-lisp
 (use-package ansi-color
-  :commands ansi-color-display
-  :hook (compilation-filter . colorize-compilation-buffer))
+  :commands ansi-color-display)
 #+END_SRC
 
 ** Compile: Run compiler
