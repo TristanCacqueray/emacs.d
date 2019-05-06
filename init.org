@@ -919,8 +919,7 @@ Replace evil search function "/" by swiper
     (magit-add-section-hook 'magit-status-sections-hook
                             'magit-insert-modules
                             'magit-insert-stashes
-                            'append)
-    (use-package evil-magit))
+                            'append))
 
   ;(use-package evil-magit
   ;  :after magit)
