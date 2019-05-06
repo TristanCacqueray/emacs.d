@@ -781,10 +781,8 @@ These are minor modes to selectively hide/show code and comment blocks
   ;;(setq company-minimum-prefix-length 2)
   (global-company-mode 1)
 
-  ;;(use-package company-quickhelp
-  ;;  :config (company-quickhelp-mode 1))
-  ;;
-  )
+  (use-package company-quickhelp
+    :config (company-quickhelp-mode 1)))
 #+END_SRC
 
 *** Helpful: A better help buffer
