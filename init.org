@@ -775,17 +775,16 @@ These are minor modes to selectively hide/show code and comment blocks
 *** Company: Auto completion
 #+BEGIN_SRC emacs-lisp
 (use-package company
-  :disabled
   :diminish
   :config
   ;;(setq company-idle-delay 0.1)
   ;;(setq company-tooltip-limit 10)
   ;;(setq company-minimum-prefix-length 2)
-  ;;(global-company-mode 1)
+  (global-company-mode 1)
 
   ;;(use-package company-quickhelp
   ;;  :config (company-quickhelp-mode 1))
-  ;;  )
+  ;;
   )
 #+END_SRC
 
