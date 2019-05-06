@@ -622,9 +622,9 @@ Comint mode is a package that defines a general command-interpreter-in-a-buffer.
 #+END_SRC
 
 *** Fill-column-indicator: vertical line at fill-column
-TODO: auto enable on prog mode
 #+BEGIN_SRC emacs-lisp
 (use-package fill-column-indicator
+  :disabled t
   :config
   (setq fci-rule-width 1)
   (fci-mode))
