@@ -63,9 +63,6 @@
 [submodule "evil"]
 	path = lib/evil
 	url = git@github.com:emacs-evil/evil.git
-[submodule "evil-collection"]
-	path = lib/evil-collection
-	url = git@github.com:emacs-evil/evil-collection.git
 [submodule "evil-leader"]
 	path = lib/evil-leader
 	url = git@github.com:cofi/evil-leader.git
@@ -87,9 +84,6 @@
 [submodule "flymake"]
 	path = lib/flymake
 	url = git@github.com:emacsmirror/flymake.git
-[submodule "general"]
-	path = lib/general
-	url = git@github.com:noctuid/general.el.git
 [submodule "ghub"]
 	path = lib/ghub
 	url = git@github.com:magit/ghub.git

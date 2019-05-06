@@ -842,7 +842,7 @@ TODO: write a script to show daily/weekly/monthly stats.
       (setq evil-want-fine-undo t)
 
       ;; TODO: check what is this :)
-      (add-hook 'with-editor-mode-hook 'evil-insert-state))
+      (add-hook 'with-editor-mode-hook 'evil-insert-state)))
 #+END_SRC
 
 ** Ivy
@@ -919,10 +919,6 @@ Replace evil search function "/" by swiper
                             'magit-insert-modules
                             'magit-insert-stashes
                             'append))
-
-  ;(use-package evil-magit
-  ;  :after magit)
-    ;; :hook (magit-mode . evil-magit-init))
 #+END_SRC
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package diff-hl
