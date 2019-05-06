@@ -2066,7 +2066,8 @@ Linting
             (set (make-local-variable 'company-backends)
                  (append '((company-capf company-dabbrev-code))
                          company-backends))))
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-unicode-input-method))
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-unicode-input-method)
+  (add-hook 'haskell-mode-hook 'haskell-auto-insert-module-template))
 #+END_SRC
 
 ** RPM
