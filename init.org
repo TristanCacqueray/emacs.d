@@ -2099,6 +2099,10 @@ Linting
 (use-package jinja2-mode)
 #+END_SRC
 
+** Markdown
+#+BEGIN_SRC emacs-lisp
+(use-package markdown-mode)
+#+END_SRC
 ** Yaml
 #+BEGIN_SRC emacs-lisp
 (use-package yaml-mode)
