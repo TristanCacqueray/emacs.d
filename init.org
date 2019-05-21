@@ -1563,7 +1563,8 @@ def process(msg):
         elif msg.get_header("X-Message-Type") != "newchange":
             tags.add("-unread")
     elif msg.get_header("X-pagure"):
-        if "zuul <pagure@pagure.io>" in mail_from:
+        if "zuul <pagure@pagure.io>" in mail_from or \
+           "zuul bot <pagure" in mail_from:
             # Mark CI results as read
             tags.add("-unread")
         tags.add("code")
