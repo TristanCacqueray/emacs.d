@@ -1146,6 +1146,7 @@ Workflow is vastly inspired by http://doc.norang.ca/org-mode.html
 #+BEGIN_SRC emacs-lisp
   (use-package org-capture
     :bind ("C-c c" . org-capture)
+    :demand
     :config
     (setq-default
      org-default-notes-file "~/org/refile.org.gpg"
@@ -1165,9 +1166,8 @@ Workflow is vastly inspired by http://doc.norang.ca/org-mode.html
      org-outline-path-complete-in-steps nil
      ;; Don't refile in gcal file
      org-refile-target-verify-function
-     (lambda () (not (or (string= (file-name-nondirectory (buffer-file-name)) "gcal.org")
-                    (string= (file-name-nondirectory (buffer-file-name)) "prodchain.org"))))
-     )
+      (lambda () (not (or (string= (file-name-nondirectory (buffer-file-name)) "gcal.org")
+                    (string= (file-name-nondirectory (buffer-file-name)) "prodchain.org")))))
     )
 #+END_SRC
 *** Agenda: show agenda with scheduled todos
