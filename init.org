@@ -138,6 +138,9 @@ Initialize borg package management.
 (setq user-init-file (or load-file-name buffer-file-name))
 (setq user-emacs-directory (file-name-directory user-init-file))
 (add-to-list 'load-path (expand-file-name "lib/borg" user-emacs-directory))
+(setq borg-rewrite-urls-alist
+  '(("git@github.com:" . "https://github.com/")
+    ("git@gitlab.com:" . "https://gitlab.com/")))
 (require 'borg)
 (borg-initialize)
 #+END_SRC
