@@ -139,13 +139,13 @@
 	url = git@github.com:jrblevin/markdown-mode.git
 [submodule "notmuch"]
 	path = lib/notmuch
-	url = git://notmuchmail.org/git/notmuch
+	url = git@github.com:TristanCacqueray/notmuch
 	load-path = emacs
 	info-path = doc/_build/texinfo
 	build-step = ./configure
 	build-step = make
 	build-step = make sphinx-texinfo
-        build-step = borg-makeinfo
+    build-step = borg-makeinfo
 [submodule "nov"]
 	path = lib/nov
 	url = git@github.com:wasamasa/nov.el.git
