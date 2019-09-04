@@ -17,3 +17,5 @@
 /dovecot.conf
 /filter.sieve
 /notmuch-tag.py
+/nov-places
+/eshell/
