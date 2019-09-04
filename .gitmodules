@@ -160,7 +160,7 @@
 	url = https://github.com/emacsorphanage/org-bullets.git
 [submodule "ox-gfm"]
 	path = lib/ox-gfm
-	url = https://github.com/larstvei/ox-gfm.git
+	url = https://github.com/TristanCacqueray/ox-gfm.git
 [submodule "ox-hugo"]
 	path = lib/ox-hugo
 	url = https://github.com/kaushalmodi/ox-hugo.git
