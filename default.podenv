@@ -1,0 +1,23 @@
+---
+parent: emacs-borg
+environ:
+  BORG_URL: https://github.com/TristanCacqueray/emacs.d
+mounts:
+  ~/.emacs.d: .
+pre-tasks:
+  - name: Detangle init.org
+    command: pushd ~/.emacs.d; make build-init; popd
+packages:
+  # Python
+  - python3-mypy
+  # Haskell
+  - hlint
+  # Notmuch
+  - gcc
+  - xapian-core-devel
+  - gmime30-devel
+  - libtalloc-devel
+  - zlib-devel
+  - python3-sphinx
+  - texinfo
+  - info
