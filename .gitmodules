@@ -137,15 +137,6 @@
 [submodule "markdown-mode"]
 	path = lib/markdown-mode
 	url = https://github.com/jrblevin/markdown-mode.git
-[submodule "notmuch"]
-	path = lib/notmuch
-	url = https://github.com/TristanCacqueray/notmuch
-	load-path = emacs
-	info-path = doc/_build/texinfo
-	build-step = ./configure
-	build-step = make
-	build-step = make sphinx-texinfo
-	build-step = borg-makeinfo
 [submodule "nov"]
 	path = lib/nov
 	url = https://github.com/wasamasa/nov.el.git

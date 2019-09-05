@@ -1,7 +1,7 @@
 ---
 parent: emacs-borg
 environ:
-  BORG_URL: https://github.com/TristanCacqueray/emacs.d
+  BORG_URL: https://github.com/TristanCacqueray/emacs.d -b without-notmuch
 mounts:
   ~/.emacs.d: .
 pre-tasks:
@@ -12,12 +12,3 @@ packages:
   - python3-mypy
   # Haskell
   - hlint
-  # Notmuch
-  - gcc
-  - xapian-core-devel
-  - gmime30-devel
-  - libtalloc-devel
-  - zlib-devel
-  - python3-sphinx
-  - texinfo
-  - info
