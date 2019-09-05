@@ -145,7 +145,7 @@
 	build-step = ./configure
 	build-step = make
 	build-step = make sphinx-texinfo
-    build-step = borg-makeinfo
+	build-step = borg-makeinfo
 [submodule "nov"]
 	path = lib/nov
 	url = https://github.com/wasamasa/nov.el.git
