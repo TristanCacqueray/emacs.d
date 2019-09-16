@@ -824,6 +824,7 @@ TODO: write a script to show daily/weekly/monthly stats.
 ** Evil: vim mode and bindings
 #+BEGIN_SRC emacs-lisp :comments nil
   (use-package evil
+    :disabled t
     :init
     ;; (setq evil-want-integration t)
     ;; (setq evil-want-keybinding nil)

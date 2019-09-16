@@ -66,9 +66,6 @@
 [submodule "evil-leader"]
 	path = lib/evil-leader
 	url = https://github.com/cofi/evil-leader.git
-[submodule "evil-magit"]
-	path = lib/evil-magit
-	url = https://github.com/emacs-evil/evil-magit.git
 [submodule "f"]
 	path = lib/f
 	url = https://github.com/rejeep/f.el.git
