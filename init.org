@@ -821,6 +821,13 @@ TODO: write a script to show daily/weekly/monthly stats.
   (run-at-time "05:00" (* 3600 24) #'my/archivekeyfreq))
   ;; (list-timers)
 #+END_SRC
+*** anzu: visual replace feedback
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package anzu
+  :config
+  (global-anzu-mode +1))
+#+END_SRC
+
 ** Evil: vim mode and bindings
 #+BEGIN_SRC emacs-lisp :comments nil
   (use-package evil
