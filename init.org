@@ -1575,6 +1575,7 @@ def process(msg):
             tags.add("-unread")
     elif msg.get_header("X-pagure"):
         if "zuul <pagure@pagure.io>" in mail_from or \
+           "zuul ci bot" in mail_from or \
            "zuul bot <pagure" in mail_from:
             # Mark CI results as read
             tags.add("-unread")
