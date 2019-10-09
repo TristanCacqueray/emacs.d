@@ -1748,25 +1748,28 @@ Finally, this script wraps all the above:
 #+BEGIN_SRC bash :tangle ~/mail-conf/sync :tangle-mode (identity #o755)
 #!/bin/bash -e
 echo "$(date): begin"
+export LD_LIBRARY_PATH=${HOME}/.emacs.d/lib/notmuch/lib/
+export PYTHONPATH=${HOME}/.emacs.d/lib/notmuch/bindings/python/
+export NOTMUCH=${HOME}/.emacs.d/lib/notmuch/notmuch
 # Send the queue
-/usr/share/msmtp/msmtpqueue/msmtp-runqueue.sh
+/usr/share/doc/msmtp/scripts/msmtpqueue/msmtp-runqueue.sh
 # Sync mail
 mbsync -Va 2>&1 | tee logs/mbsync.log | grep "^master:"
 # Filter the inbox
 sieve-filter -W -e -c .dovecot.conf -v  .filter.sieve inbox &> logs/sieve.log
 # Index new mails
-notmuch new 2>&1 | grep -v "Ignoring non-mail file"
+$NOTMUCH new 2>&1 | grep -v "Ignoring non-mail file"
 # Tag new mails
 ./conf/notmuch-tag.py --debug | tee logs/tag.log
 # Send notification
-NEW=$(notmuch count tag:inbox and tag:unread)
+NEW=$($NOTMUCH count tag:inbox and tag:unread)
 if [ $NEW -gt 0 ]; then
     notify-send "$NEW unread mails" --icon=mail-message-new
 fi
 # Backup
 if [ $[ $(date "+%s") - $(stat -c %Y backup/status || echo 0) ] -gt 86400 ]; then
   echo "$(date): daily index backup"
-  notmuch dump | gzip -9 > backup/nm-dump-$(date "+%Y-%m-%d").gz && touch backup/status
+  $NOTMUCH dump | gzip -9 > backup/nm-dump-$(date "+%Y-%m-%d").gz && touch backup/status
 fi
 echo "$(date): done"
 #+END_SRC
