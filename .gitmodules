@@ -16,6 +16,9 @@
 [submodule "borg"]
 	path = lib/borg
 	url = https://github.com/emacscollective/borg.git
+[submodule "bpftrace-mode"]
+	path = lib/bpftrace-mode
+	url = https://gitlab.com/jgkamat/bpftrace-mode.git
 [submodule "closql"]
 	path = lib/closql
 	url = https://github.com/emacscollective/closql.git
@@ -147,8 +150,6 @@
 	info-path = doc/_build/texinfo
 	build-step = ./configure
 	build-step = make
-	build-step = make sphinx-texinfo
-	build-step = borg-makeinfo
 [submodule "nov"]
 	path = lib/nov
 	url = https://github.com/wasamasa/nov.el.git

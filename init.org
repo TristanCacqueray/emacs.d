@@ -2122,6 +2122,10 @@ Linting
 #+BEGIN_SRC emacs-lisp
 (use-package markdown-mode)
 #+END_SRC
+** Bpftrace
+#+BEGIN_SRC emacs-lisp
+(use-package bpftrace-mode)
+#+END_SRC
 ** Lua
 #+BEGIN_SRC emacs-lisp
 (use-package lua-mode)
