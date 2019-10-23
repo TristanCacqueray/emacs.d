@@ -1753,7 +1753,8 @@ export LD_LIBRARY_PATH=${HOME}/.emacs.d/lib/notmuch/lib/
 export PYTHONPATH=${HOME}/.emacs.d/lib/notmuch/bindings/python/
 export NOTMUCH=${HOME}/.emacs.d/lib/notmuch/notmuch
 # Send the queue
-/usr/share/doc/msmtp/scripts/msmtpqueue/msmtp-runqueue.sh
+/data/conf/msmtp-listqueue.sh
+/data/conf/msmtp-runqueue.sh
 # Sync mail
 mbsync -Va 2>&1 | tee logs/mbsync.log | grep "^master:"
 # Filter the inbox
@@ -1911,7 +1912,7 @@ I use notmuch-hello mode to browse, manage and compose mails:
 
     ;; Send with msmtp
     message-send-mail-function 'message-send-mail-with-sendmail
-    sendmail-program "/usr/share/doc/msmtp/scripts/msmtpqueue/msmtp-enqueue.sh"
+    sendmail-program "/data/conf/msmtp-enqueue.sh"
     message-sendmail-f-is-evil nil
 
     ;; Get sending mail error
