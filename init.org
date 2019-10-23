@@ -885,7 +885,8 @@ Replace evil search function "/" by swiper
 (use-package swiper
   :bind (("M-s" . swiper))
   :config
-  (define-key evil-normal-state-map "/" 'swiper))
+  ;; (define-key evil-normal-state-map "/" 'swiper)
+)
 #+END_SRC
 
 *** Ivy: Incremental completYon
