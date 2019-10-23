@@ -260,7 +260,7 @@ Use the solarized dark theme without bolding or text scaling.
 
 Use the Hack font.
 #+BEGIN_SRC emacs-lisp :comments nil
-(set-frame-font "Hack 14")
+(set-frame-font "Hack 9")
 #+END_SRC
 
 * Personal Information
