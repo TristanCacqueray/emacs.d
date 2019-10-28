@@ -170,32 +170,6 @@ The use-package macro allows you to isolate package configuration in your
 #+BEGIN_SRC emacs-lisp
   (require 'use-package)
 
-  ;; General key binding
-  (use-package general
-    :disabled t
-    :config
-    (general-override-mode 1)
-    (general-create-definer tyrant-def
-      :states '(normal visual insert motion emacs)
-      :prefix "SPC"
-      :non-normal-prefix "C-SPC")
-    (tyrant-def
-      ""  nil
-      "c" (general-simulate-key "C-c")
-      "h" (general-simulate-key "C-h")
-      "u" (general-simulate-key "C-u")
-      "x" (general-simulate-key "C-x")
-
-      ;; Buffer operations
-      "b"   '(:ignore t :which-key "buffer")
-      "bb"  'mode-line-other-buffer
-      "bd"  'kill-this-buffer
-      "b]"  'next-buffer
-      "b["  'previous-buffer
-      "bq"  'kill-buffer-and-window
-      "bR"  'rename-file-and-buffer
-      "br"  'revert-buffer))
-
   ;; For the :bind keyword
   (use-package bind-key)
 
@@ -601,6 +575,52 @@ Comint mode is a package that defines a general command-interpreter-in-a-buffer.
 #+END_SRC
 
 * Editor extra packages
+** God-mode: simulate vim mode by prefixing any key by Control
+This mode enable navigation without using the Control key
+#+BEGIN_SRC emacs-lisp
+  (use-package god-mode
+    :disabled t
+    :init
+    (defun update-cursor ()
+      (setq cursor-type (if (or god-local-mode buffer-read-only)
+                            'bar
+                          'box)))
+    (add-hook 'god-mode-enabled-hook 'update-cursor)
+    (add-hook 'god-mode-disabled-hook 'update-cursor)
+    :config
+    (global-set-key (kbd "<escape>") 'god-mode-all)
+    (setq god-exempt-major-modes nil)
+    (setq god-exempt-predicates nil)
+    ;;(bind-keys :map launcher-map
+    ;;           ("g" . god-local-mode))
+    (bind-keys :map god-local-mode-map
+              ;; ("z" . repeat)
+              ;; ("." . repeat)
+               ("i" . god-local-mode))
+    (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
+    (add-to-list 'god-exempt-major-modes 'magit-status)
+
+    ;; Navigate window layout using zp zn zb zf
+    (global-unset-key (kbd "C-z"))
+    (global-set-key (kbd "C-z C-p") 'windmove-up)
+    (global-set-key (kbd "C-z C-n") 'windmove-down)
+    (global-set-key (kbd "C-z C-b") 'windmove-left)
+    (global-set-key (kbd "C-z C-f") 'windmove-right)
+
+    ;; Split screen using x1 x2...
+    (global-set-key (kbd "C-x C-1") 'delete-other-windows)
+    (global-set-key (kbd "C-x C-2") 'split-window-below)
+    (global-set-key (kbd "C-x C-3") 'split-window-right)
+    (global-set-key (kbd "C-x C-0") 'delete-window)
+    (global-set-key (kbd "C-x C-g") 'magit-status)
+    (global-set-key (kbd "C-x C-k") 'kill-this-buffer)
+    (global-set-key (kbd "C-x C-o") 'other-window))
+  (use-package god-mode-isearch
+    :config
+    (define-key isearch-mode-map (kbd "<escape>") 'god-mode-isearch-activate)
+    (define-key god-mode-isearch-map (kbd "<escape>") 'god-mode-isearch-disable))
+#+END_SRC
+
 ** UI
 *** Nyan cat: Buffer position with a cat
 #+BEGIN_SRC emacs-lisp
@@ -1284,6 +1304,120 @@ task done in the past.
   :after (:any org notmuch))
 #+END_SRC
 
+* Term
+** Eshell
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package eshell
+  :config
+  (setq-default
+    eshell-hist-ignoredups t
+))
+#+END_SRC
+** Ansi terminal
+
+From https://www.emacswiki.org/emacs/AnsiTermHints
+#+BEGIN_SRC emacs-lisp :comments nil
+  (defun term/shell (program &optional new-buffer-name)
+    "Start a terminal-emulator in a new buffer.
+
+      With a prefix argument, it prompts the user for the shell
+      executable.
+
+      If there is already existing buffer with the same name, switch to
+      that buffer, otherwise it creates new buffer.
+
+      Like `shell', it loads `~/.emacs_SHELLNAME' if exists, or
+      `~/.emacs.d/init_SHELLNAME.sh'.
+
+      The shell file name (sans directories) is used to make a symbol
+      name such as `explicit-bash-args'.  If that symbol is a variable,
+      its value is used as a list of arguments when invoking the
+      shell."
+    (interactive (let ((default-prog (or explicit-shell-file-name
+                                         (getenv "ESHELL")
+                                         shell-file-name
+                                         (getenv "SHELL")
+                                         "/bin/sh")))
+                   (list (if (or (null default-prog)
+                                 current-prefix-arg)
+                             (read-from-minibuffer "Run program: " default-prog)
+                           default-prog))))
+
+    ;; Pick the name of the new buffer.
+    (setq term-ansi-buffer-name
+          (if new-buffer-name
+              new-buffer-name
+            (if term-ansi-buffer-base-name
+                (if (eq term-ansi-buffer-base-name t)
+                    (file-name-nondirectory program)
+                  term-ansi-buffer-base-name)
+              "shell/term")))
+
+    (setq term-ansi-buffer-name (concat "*" term-ansi-buffer-name "*"))
+
+    ;; In order to have more than one term active at a time
+    ;; I'd like to have the term names have the *term-ansi-term<?>* form,
+    ;; for now they have the *term-ansi-term*<?> form but we'll see...
+    (when current-prefix-arg
+      (setq term-ansi-buffer-name
+            (generate-new-buffer-name term-ansi-buffer-name)))
+
+    (let* ((name (file-name-nondirectory program))
+           (startfile (concat "~/.emacs_" name))
+           (xargs-name (intern-soft (concat "explicit-" name "-args"))))
+      (unless (file-exists-p startfile)
+        (setq startfile (concat user-emacs-directory "init_" name ".sh")))
+
+      (setq term-ansi-buffer-name
+            (apply 'term-ansi-make-term term-ansi-buffer-name program
+                   (if (file-exists-p startfile) startfile)
+                   (if (and xargs-name (boundp xargs-name))
+                       ;; `term' does need readline support.
+                       (remove "--noediting" (symbol-value xargs-name))
+                     '("-i")))))
+
+    (set-buffer term-ansi-buffer-name)
+    (term-mode)
+    (term-line-mode)                      ; (term-char-mode) if you want
+
+
+
+    (setq term-buffer-maximum-size 65535)
+
+    ;; I wanna have find-file on C-x C-f -mm
+    ;; your mileage may definitely vary, maybe it's better to put this in your
+    ;; .emacs ...
+
+    (term-set-escape-char ?\C-x)
+    (switch-to-buffer term-ansi-buffer-name))
+
+
+  (defun open-localhost ()
+    (interactive)
+    (ansi-term "bash" "localhost"))
+
+  ;; Use this for remote so I can specify command line arguments
+  (defun remote-term (new-buffer-name cmd &rest switches)
+    (setq term-ansi-buffer-name (concat "*" new-buffer-name "*"))
+    (setq term-ansi-buffer-name (generate-new-buffer-name term-ansi-buffer-name))
+    (setq term-ansi-buffer-name (apply 'make-term term-ansi-buffer-name cmd nil switches))
+    (set-buffer term-ansi-buffer-name)
+    (term-mode)
+    (term-char-mode)
+    (term-set-escape-char ?\C-x)
+    (switch-to-buffer term-ansi-buffer-name))
+
+  (defun open-cmdev2 ()
+    (interactive)
+    (remote-term "cmdev2" "ssh" "kreg@cmdev2.dsa.int"))
+#+END_SRC
+
+** Tramp
+#+BEGIN_SRC emacs-lisp :comments nil
+;; (use-package tramp-loaddefs)
+(use-package tramp
+  :defer t)
+#+END_SRC
 * Mail
 This is my setup to process mails. As a disclaimer I'm posting here as other
 may find it useful, but be advised it's fine tuned for my personal needs.
