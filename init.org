@@ -78,10 +78,7 @@ Increase max number of log messages
 ** Set some early UI settings
 Disable Tool and Menubar
 #+BEGIN_SRC emacs-lisp
-;; A weird flickering bug is happening if tool-bar-mode is disabled too early
-;; It is disabled at the very end...
-;; See: https://github.com/emacs-evil/evil/issues/820
-;;(tool-bar-mode -1)
+(tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 #+END_SRC
@@ -107,6 +104,11 @@ scratch buffer by default
 Toggle fullscreen by default
 #+BEGIN_SRC emacs-lisp
 (toggle-frame-maximized)
+#+END_SRC
+
+Ensure latest version of a file is loaded
+#+BEGIN_SRC emacs-lisp
+(setq-default load-prefer-newer t)
 #+END_SRC
 
 ** Package Management
@@ -158,7 +160,7 @@ git config --global url.https://code.orgmode.org/.insteadOf git@code.orgmode.org
 #+END_SRC
 
 Submodule gets dirty because of lisp compilation and autoload list, add
-these to the ~/.gitignore_global file:
+these to the ~/.config/git/ignore file:
 #+BEGIN_SRC bash :tangle no
 *.elc
 *-autoloads.el
@@ -169,6 +171,7 @@ The use-package macro allows you to isolate package configuration in your
 .emacs file in a way that is both performance-oriented and, well, tidy.
 #+BEGIN_SRC emacs-lisp
   (require 'use-package)
+  (setq use-package-verbose t)
 
   ;; For the :bind keyword
   (use-package bind-key)
@@ -278,8 +281,8 @@ Set default settings, use "C-h v" to desribe the variable
   visible-bell nil
   ring-bell-function 'ignore
 
-  ;; Auto wrap at 80 columns
-  fill-column 80
+  ;; Auto wrap after some columns
+  fill-column 120
 
   ;; Confirm closing emacs
   confirm-kill-emacs 'y-or-n-p
@@ -418,7 +421,6 @@ Note that this makes diminish useless.
 #+END_SRC
 
 ** Paren: Show matching parenthesis, brackets, ...
-'%' go to the other match
 #+BEGIN_SRC emacs-lisp
 (use-package paren
   :config
@@ -440,7 +442,7 @@ Note that this makes diminish useless.
   :config
   (add-to-list 'recentf-exclude "^/\\(?:ssh\\|su\\|sudo\\)?:")
   (setq-default
-    recentf-max-saved-items 128))
+    recentf-max-saved-items 256))
 #+END_SRC
 
 ** Auto-revert: Revert buffer when file changes on disk
@@ -579,6 +581,7 @@ Comint mode is a package that defines a general command-interpreter-in-a-buffer.
 This mode enable navigation without using the Control key
 #+BEGIN_SRC emacs-lisp
   (use-package god-mode
+    ;; disable for now because of bad interaction with magit
     :disabled t
     :init
     (defun update-cursor ()
@@ -640,6 +643,7 @@ This mode enable navigation without using the Control key
 *** Hl-todo: Highlight and navigate TODO keywords
 #+BEGIN_SRC emacs-lisp
 (use-package hl-todo
+  :disabled t
   :defer 2
   :config (global-hl-todo-mode))
 #+END_SRC
@@ -656,6 +660,7 @@ This mode enable navigation without using the Control key
 *** Volatile highlights: visual feedback on some operations like yank,kill,undo
 #+BEGIN_SRC emacs-lisp
 (use-package volatile-highlights
+  :disabled t
   :defer 10
   :config (volatile-highlights-mode t))
 #+END_SRC
@@ -691,6 +696,7 @@ different face
 #+BEGIN_SRC emacs-lisp
 (use-package which-func
   :defer 5
+  :disabled t
   :config (which-function-mode 1))
 #+END_SRC
 
@@ -713,6 +719,7 @@ different face
 #+BEGIN_SRC emacs-lisp
 (use-package highlight-indent-guides
   :diminish
+  :disabled t
   :hook ((sass-mode yaml-mode) . highlight-indent-guides-mode))
 #+END_SRC
 
@@ -744,7 +751,7 @@ different face
 (use-package undo-tree
   :diminish
   :config
-  (setq undo-tree-visualizer-timestamps t)
+  ;; (setq undo-tree-visualizer-timestamps t)
   (setq undo-tree-visualizer-diff t)
   (global-undo-tree-mode))
 #+END_SRC
@@ -772,6 +779,7 @@ These are minor modes to selectively hide/show code and comment blocks
 #+BEGIN_SRC emacs-lisp
 (use-package hideshow
   :diminish
+  :disabled t
   :hook (prog-mode  . hs-minor-mode))
 
 (use-package outline
@@ -780,6 +788,7 @@ These are minor modes to selectively hide/show code and comment blocks
 
 (use-package bicycle
   :diminish
+  :disabled t
   :after outline
   :bind (:map outline-minor-mode-map
          ([C-tab] . bicycle-cycle)
@@ -790,6 +799,7 @@ These are minor modes to selectively hide/show code and comment blocks
 #+BEGIN_SRC emacs-lisp
 (use-package smartparens
   :config
+  :disabled t
   (require 'smartparens-config)
   (smartparens-global-mode))
 #+END_SRC
@@ -1887,8 +1897,8 @@ export LD_LIBRARY_PATH=${HOME}/.emacs.d/lib/notmuch/lib/
 export PYTHONPATH=${HOME}/.emacs.d/lib/notmuch/bindings/python/
 export NOTMUCH=${HOME}/.emacs.d/lib/notmuch/notmuch
 # Send the queue
-/data/conf/msmtp-listqueue.sh
-/data/conf/msmtp-runqueue.sh
+~/conf/msmtp-listqueue.sh
+~/conf/msmtp-runqueue.sh
 # Sync mail
 mbsync -Va 2>&1 | tee logs/mbsync.log | grep "^master:"
 # Filter the inbox
@@ -2332,10 +2342,6 @@ Linting
 ** Rust
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package rust-mode
-  :bind (("C-c C-c" . rust-compile)
-         ("C-c C-r" . rust-run)
-         ("C-c C-t" . rust-test)
-         ("C-c C-f" . rust-format-buffer))
   :config
   ;; Add run command
 
@@ -2436,8 +2442,6 @@ I miss that from Vim
     (setq file-name-handler-alist file-name-handler-alist-old)
     ;; Let's lower our GC thresholds back down to a sane level.
     (setq gc-cons-threshold (* 20 1024 1024))
-    ;; Finaly disable tool-bar, check initialization notes
-    (tool-bar-mode -1)
     ;; Go to home directory
     (cd (expand-file-name "~/")))
   t)
