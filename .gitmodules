@@ -225,6 +225,9 @@
 [submodule "solarized-theme"]
 	path = lib/solarized-theme
 	url = https://github.com/bbatsov/solarized-emacs.git
+[submodule "transient"]
+	path = lib/transient
+	url = https://github.com/magit/transient.git
 [submodule "undo-tree"]
 	path = lib/undo-tree
 	url = https://github.com/emacsorphanage/undo-tree.git
