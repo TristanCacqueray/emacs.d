@@ -75,9 +75,6 @@
 [submodule "f"]
 	path = lib/f
 	url = https://github.com/rejeep/f.el.git
-[submodule "fill-column-indicator"]
-	path = lib/fill-column-indicator
-	url = https://github.com/alpaker/Fill-Column-Indicator.git
 [submodule "flx"]
 	path = lib/flx
 	url = https://github.com/lewang/flx.git

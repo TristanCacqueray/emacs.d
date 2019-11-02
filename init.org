@@ -648,15 +648,6 @@ This mode enable navigation without using the Control key
   :config (global-hl-todo-mode))
 #+END_SRC
 
-*** Fill-column-indicator: vertical line at fill-column
-#+BEGIN_SRC emacs-lisp
-(use-package fill-column-indicator
-  :disabled t
-  :config
-  (setq fci-rule-width 1)
-  (fci-mode))
-#+END_SRC
-
 *** Volatile highlights: visual feedback on some operations like yank,kill,undo
 #+BEGIN_SRC emacs-lisp
 (use-package volatile-highlights
