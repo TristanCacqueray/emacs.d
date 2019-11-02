@@ -1300,7 +1300,7 @@ task done in the past.
 
 *** Notmuch: link mail from org mode
 #+BEGIN_SRC emacs-lisp
-(use-package org-notmuch
+(use-package ol-notmuch
   :demand t
   :after (:any org notmuch))
 #+END_SRC
@@ -2306,7 +2306,6 @@ Linting
 (use-package elisp-mode
   :config
   (add-hook 'emacs-lisp-mode-hook (lambda ()
-    (message "el mode loaded :)")
     (rainbow-delimiters-mode t)
     (whitespace-mode -1))))
 
