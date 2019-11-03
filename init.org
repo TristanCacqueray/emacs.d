@@ -582,7 +582,7 @@ This mode enable navigation without using the Control key
 #+BEGIN_SRC emacs-lisp
   (use-package god-mode
     ;; disable for now because of bad interaction with magit
-    :disabled t
+    ;; :disabled t
     :init
     (defun update-cursor ()
       (setq cursor-type (if (or god-local-mode buffer-read-only)
@@ -592,8 +592,8 @@ This mode enable navigation without using the Control key
     (add-hook 'god-mode-disabled-hook 'update-cursor)
     :config
     (global-set-key (kbd "<escape>") 'god-mode-all)
-    (setq god-exempt-major-modes nil)
-    (setq god-exempt-predicates nil)
+    ;;(setq god-exempt-major-modes nil)
+    ;;(setq god-exempt-predicates nil)
     ;;(bind-keys :map launcher-map
     ;;           ("g" . god-local-mode))
     (bind-keys :map god-local-mode-map
@@ -601,7 +601,7 @@ This mode enable navigation without using the Control key
               ;; ("." . repeat)
                ("i" . god-local-mode))
     (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
-    (add-to-list 'god-exempt-major-modes 'magit-status)
+    ;;(add-to-list 'god-exempt-major-modes 'magit-status)
 
     ;; Navigate window layout using zp zn zb zf
     (global-unset-key (kbd "C-z"))
@@ -611,13 +611,14 @@ This mode enable navigation without using the Control key
     (global-set-key (kbd "C-z C-f") 'windmove-right)
 
     ;; Split screen using x1 x2...
-    (global-set-key (kbd "C-x C-1") 'delete-other-windows)
-    (global-set-key (kbd "C-x C-2") 'split-window-below)
-    (global-set-key (kbd "C-x C-3") 'split-window-right)
-    (global-set-key (kbd "C-x C-0") 'delete-window)
-    (global-set-key (kbd "C-x C-g") 'magit-status)
-    (global-set-key (kbd "C-x C-k") 'kill-this-buffer)
-    (global-set-key (kbd "C-x C-o") 'other-window))
+    ;;(global-set-key (kbd "C-x C-1") 'delete-other-windows)
+    ;;(global-set-key (kbd "C-x C-2") 'split-window-below)
+    ;;(global-set-key (kbd "C-x C-3") 'split-window-right)
+    ;;(global-set-key (kbd "C-x C-0") 'delete-window)
+    ;;(global-set-key (kbd "C-x C-g") 'magit-status)
+    ;;(global-set-key (kbd "C-x C-k") 'kill-this-buffer)
+    ;;(global-set-key (kbd "C-x C-o") 'other-window)
+    )
   (use-package god-mode-isearch
     :config
     (define-key isearch-mode-map (kbd "<escape>") 'god-mode-isearch-activate)
