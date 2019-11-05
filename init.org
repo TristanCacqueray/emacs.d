@@ -582,7 +582,7 @@ This mode enable navigation without using the Control key
 #+BEGIN_SRC emacs-lisp
   (use-package god-mode
     ;; disable for now because of bad interaction with magit
-    ;; :disabled t
+    :disabled t
     :init
     (defun update-cursor ()
       (setq cursor-type (if (or god-local-mode buffer-read-only)
@@ -600,8 +600,11 @@ This mode enable navigation without using the Control key
               ;; ("z" . repeat)
               ;; ("." . repeat)
                ("i" . god-local-mode))
-    (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
-    ;;(add-to-list 'god-exempt-major-modes 'magit-status)
+    ;;(add-to-list 'god-exempt-major-modes 'org-agenda-mode)
+    (add-to-list 'god-exempt-major-modes 'notmuch-hello)
+    (add-to-list 'god-exempt-major-modes 'notmuch-show)
+    (add-to-list 'god-exempt-major-modes 'notmuch-search)
+    (add-to-list 'god-exempt-major-modes 'magit-status)
 
     ;; Navigate window layout using zp zn zb zf
     (global-unset-key (kbd "C-z"))
@@ -809,8 +812,9 @@ These are minor modes to selectively hide/show code and comment blocks
   (use-package company-quickhelp
     :config (company-quickhelp-mode 1)))
 
-(use-package company-box
-  :hook (company-mode . company-box-mode))
+;;(use-package all-the-icons)
+;;(use-package company-box
+;;  :hook (company-mode . company-box-mode))
 #+END_SRC
 
 *** Helpful: A better help buffer
@@ -986,56 +990,7 @@ Replace evil search function "/" by swiper
     projectile-file-exists-local-cache-expire 30
     projectile-enable-caching t
     ;; Use ivy
-    projectile-completion-system 'ivy
-    ;; My ignore lists
-    projectile-globally-ignored-file-suffixes
-      '("pyc"
-        "png"
-        "jpg"
-        "gif"
-        "zip"
-        "Trash"
-        "swp"
-        "swo"
-        "DS_Store"
-        "swn"
-        "ico"
-        "o"
-        "elc"
-        "a"
-        "so"
-        "exe"
-        "egg-info"
-        "egg"
-        "dmg")
-    projectile-globally-ignored-directories
-      '(".tmp"
-        ".venv"
-        ".pytest_cache"
-        ".eggs"
-        ".coverage"
-        ".git"
-        ".hg"
-        ".idea"
-        ".flsckout"
-        ".bzr"
-        "_darcs"
-        ".tox"
-        ".svn"
-        ".egg"
-        ".egg-info"
-        ".sass-cache"
-        "*.egg-info"
-        ".mypy_cache"
-        "logreduce/server/web"
-        "pagure/static"
-        "pagure/themes"
-        "__pycache__"
-        ".webassets-cache"
-        "node_modules"
-        "venv"
-        "elpa"
-        ".stack-work"))
+    projectile-completion-system 'ivy)
   (projectile-mode))
 #+END_SRC
 
