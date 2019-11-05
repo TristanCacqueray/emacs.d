@@ -192,6 +192,9 @@
 [submodule "rainbow-mode"]
 	path = lib/rainbow-mode
 	url = https://github.com/emacsmirror/rainbow-mode.git
+[submodule "ripgrep"]
+	path = lib/ripgrep
+	url = https://github.com/nlamirault/ripgrep.el.git
 [submodule "rjsx-mode"]
 	path = lib/rjsx-mode
 	url = https://github.com/felipeochoa/rjsx-mode.git
