@@ -41,6 +41,9 @@
 	path = lib/dash
 	url = https://github.com/magnars/dash.el.git
 	no-makeinfo = dash-template.texi
+[submodule "dhall-mode"]
+	path = lib/dhall-mode
+	url = https://github.com/psibi/dhall-mode.git
 [submodule "diff-hl"]
 	path = lib/diff-hl
 	url = https://github.com/dgutov/diff-hl.git
@@ -192,6 +195,9 @@
 [submodule "rainbow-mode"]
 	path = lib/rainbow-mode
 	url = https://github.com/emacsmirror/rainbow-mode.git
+[submodule "reformatter"]
+	path = lib/reformatter
+	url = https://github.com/purcell/reformatter.el.git
 [submodule "ripgrep"]
 	path = lib/ripgrep
 	url = https://github.com/nlamirault/ripgrep.el.git

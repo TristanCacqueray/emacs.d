@@ -2203,6 +2203,11 @@ Linting
   (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
   (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal))
 #+END_SRC
+** Dhall
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package dhall-mode
+  :mode "\\.dhall\\'")
+#+END_SRC
 
 ** RPM
 #+BEGIN_SRC emacs-lisp
