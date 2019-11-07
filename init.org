@@ -2170,8 +2170,8 @@ Linting
     ;; Only do flycheck when I actually safe the buffer
     flycheck-check-syntax-automatically '(save mode-enable)
     ;; Keep a global mypy cache
-    flycheck-python-mypy-cache-dir "~/.mypy-cache")
-)
+    flycheck-python-mypy-cache-dir (expand-file-name "~/.mypy-cache")
+))
 #+END_SRC
 
 ** Haskell
@@ -2258,6 +2258,7 @@ Linting
   :interpreter ("python3" . python-mode)
   :init
   (setq
+    flycheck-python-pycompile-executable "python3"
     python-shell-interpreter "python3"
     py-python-command "python3"
     ;; Don't spam message buffer when python-mode can't guess indent-offset

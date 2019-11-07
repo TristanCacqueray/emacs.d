@@ -84,6 +84,9 @@
 [submodule "flycheck"]
 	path = lib/flycheck
 	url = https://github.com/flycheck/flycheck.git
+[submodule "flycheck-mypy"]
+	path = lib/flycheck-mypy
+	url = https://github.com/lbolla/emacs-flycheck-mypy.git
 [submodule "flymake"]
 	path = lib/flymake
 	url = https://github.com/emacsmirror/flymake.git
