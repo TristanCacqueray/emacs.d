@@ -2029,11 +2029,11 @@ I use notmuch-hello mode to browse, manage and compose mails:
                            :count-query "tag:sicp and not tag:ignored and tag:unread")
       (:name "sec"      :key "s" :query "(tag:vmt or (tag:watched and tag:sec))"
                            :count-query "(tag:vmt or (tag:watched and tag:sec)) and tag:unread")
-      (:name "monit"    :key "m" :query "tag:monit and not tag:ignored"
+      (:name "monit"    :key "m" :query "tag:monit and not tag:ignored and tag:unread"
                            :count-query "tag:monit and not tag:ignored and tag:unread" :key "m")
       (:name "team"     :key "t" :query "tag:team and not (tag:code or tag:calendar)"
                            :count-query "tag:team and not (tag:code or tag:calendar) and tag:unread")
-      (:name "code"     :key "c" :query "(tag:watched and (tag:code or tag:bug))"
+      (:name "code"     :key "c" :query "(tag:watched and (tag:code or tag:bug) and tag:unread)"
                            :count-query "(tag:watched and (tag:code or tag:bug)) and tag:unread")
       (:name "watched"  :key "w" :query "(tag:watched and not (tag:code or tag:bug))"
                            :count-query "(tag:watched and not (tag:code or tag:bug)) and tag:unread")
