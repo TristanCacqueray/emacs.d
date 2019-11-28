@@ -2180,6 +2180,7 @@ Linting
   :bind ((:map haskell-mode-map
            ("<f8>" . haskell-navigate-imports)))
   :config
+  (setq haskell-stylish-on-save t)
   ;; Copy pasta from http://haskell.github.io/haskell-mode/manual/latest/
   (add-hook 'haskell-mode-hook
           (lambda ()
