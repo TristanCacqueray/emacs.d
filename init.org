@@ -2206,7 +2206,12 @@ Linting
 ** Dhall
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package dhall-mode
-  :mode "\\.dhall\\'")
+  :mode "\\.dhall\\'"
+  :config
+  (setq
+    dhall-format-arguments (\` ("--ascii"))
+    dhall-use-header-line nil)
+)
 #+END_SRC
 
 ** RPM
