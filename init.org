@@ -2260,6 +2260,7 @@ Linting
   (setq
     flycheck-python-pycompile-executable "python3"
     python-shell-interpreter "python3"
+    flycheck-python-pycompile-executable "python3"
     py-python-command "python3"
     ;; Don't spam message buffer when python-mode can't guess indent-offset
     python-indent-guess-indent-offset-verbose nil
