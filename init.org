@@ -15,7 +15,8 @@ and fast, but this is no longer relevant for me. I prefer Emacs because:
 For the best experience, I would recommend to build an Emacs configuration
 one option at a time and avoid distribution such as Spacemacs.
 
-This configuration is vastly inspired by [[https://github.com/dakra/dmacs][dmacs]] and the [[https://github.com/caisah/emacs.dz][emacs.dz awesome list]].
+: This configuration is vastly inspired by [[https://github.com/dakra/dmacs][dmacs]] and the [[https://github.com/caisah/emacs.dz][emacs.dz awesome list]].
+Also from [[https://git.sr.ht/~zge/emacs.d]]
 
 ** Installation
 This config doesn't use ~package.el~ as package management but
@@ -383,7 +384,36 @@ Enable some global mode (TODO: move this to another section?)
 (prefer-coding-system 'utf-8-unix)
 ;; Accept 'UTF-8' (uppercase) as a valid encoding in the coding header
 (define-coding-system-alias 'UTF-8 'utf-8)
+
+;; Force Emacs to use English timestamps
+(setq system-time-locale "C")
 #+END_SRC
+
+** Extras
+*** Disable lockfiles
+	#+BEGIN_SRC emacs-lisp
+	  (setq create-lockfiles nil)
+	#+END_SRC
+
+	Lockfiles appear when a file is opened and confuses some tools. I
+	trust /myself/ to not come into a situation where lockfiles are
+	needed, and have therefore disabled them.
+
+*** Frame resizing
+	#+BEGIN_SRC emacs-lisp
+	  (setq frame-resize-pixelwise t)
+	#+END_SRC
+
+	When using graphical Emacs, this option enables more flexible
+	resizing of the entire frame.
+*** Window resizing
+	#+BEGIN_SRC emacs-lisp
+	  (setq window-combination-resize t)
+	#+END_SRC
+
+	This option make Emacs split windows in a more sane and visually
+	pleasing manner, ie. proportionally.
+
 
 * Configure Emacs builtin packages
 Improved default settings
@@ -427,6 +457,8 @@ Note that this makes diminish useless.
   (setq show-paren-delay 0.0)
   (show-paren-mode))
 #+END_SRC
+To extend the default Emacs appearance, matching parentheses are
+highlighted, which is helpful when working with Lisp code.
 
 ** Man: Man page documentation.
 #+BEGIN_SRC emacs-lisp :comments nil
@@ -2157,6 +2189,9 @@ I use notmuch-hello mode to browse, manage and compose mails:
 (progn ;    `text-mode'
   (add-hook 'text-mode-hook #'indicate-buffer-boundaries-left))
 #+END_SRC
+
+Sometimes it's not obvious if you're at the top or bottom of a
+buffer. So these indicators tell precisely that.
 
 *** Flycheck
 Linting
