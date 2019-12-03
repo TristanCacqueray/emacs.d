@@ -2256,6 +2256,12 @@ Linting
   :mode ("\\.pyd\\'" "\\.pyi\\'" "\\.pyx\\'"))
 (use-package flycheck-cython
   :after (cython-mode flycheck))
+(use-package flycheck-mypy
+  :config
+  (add-to-list 'flycheck-disabled-checkers 'python-flake8)
+  (add-to-list 'flycheck-disabled-checkers 'python-pylint)
+  (add-to-list 'flycheck-checkers 'python-mypy t)
+)
 #+END_SRC
 #+BEGIN_SRC emacs-lisp
 (use-package python
