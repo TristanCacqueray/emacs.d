@@ -237,6 +237,9 @@
 [submodule "transient"]
 	path = lib/transient
 	url = https://github.com/magit/transient.git
+[submodule "tuareg"]
+	path = lib/tuareg
+	url = https://github.com/ocaml/tuareg.git
 [submodule "undo-tree"]
 	path = lib/undo-tree
 	url = https://github.com/emacsorphanage/undo-tree.git

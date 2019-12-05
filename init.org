@@ -2209,6 +2209,10 @@ Linting
 ))
 #+END_SRC
 
+** OCaml
+#+BEGIN_SRC emacs-lisp
+(use-package tuareg)
+#+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package haskell-mode
