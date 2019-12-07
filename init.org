@@ -2198,6 +2198,7 @@ Linting
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package flycheck
   :hook ((prog-mode ledger-mode) . flycheck-mode)
+  :bind (("<f3>" . flycheck-next-error))
   :diminish
   :config
   (global-flycheck-mode)
