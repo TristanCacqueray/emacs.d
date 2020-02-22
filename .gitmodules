@@ -189,6 +189,9 @@
 [submodule "projectile"]
 	path = lib/projectile
 	url = https://github.com/bbatsov/projectile.git
+[submodule "purescript-mode"]
+	path = lib/purescript-mode
+	url = https://github.com/purescript-emacs/purescript-mode.git
 [submodule "rainbow-delimiters"]
 	path = lib/rainbow-delimiters
 	url = https://github.com/Fanael/rainbow-delimiters.git

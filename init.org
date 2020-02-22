@@ -2254,6 +2254,10 @@ Linting
 )
 #+END_SRC
 
+** Purescript
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package purescript-mode)
+#+END_SRC
 ** RPM
 #+BEGIN_SRC emacs-lisp
 (use-package rpm-spec-mode)
