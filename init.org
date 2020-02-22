@@ -337,6 +337,10 @@ Set some global key binding (TODO: move this to another section?)
 ;; Ignore korean layout switch
 (global-set-key (kbd "<Hangul_Hanja>") 'ignore)
 
+;; Indent selection by one tab length
+(global-set-key (kbd "C->") 'indent-rigidly-right-to-tab-stop)
+(global-set-key (kbd "C-<") 'indent-rigidly-left-to-tab-stop)
+
 ;; Don't quit Emacs on C-x C-c
 (when (daemonp)
   (global-set-key (kbd "C-x C-c") 'kill-buffer-and-window))
