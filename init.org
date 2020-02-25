@@ -2260,7 +2260,10 @@ Linting
 
 ** Purescript
 #+BEGIN_SRC emacs-lisp :comments nil
-(use-package purescript-mode)
+(use-package purescript-mode
+  :mode "\\.purs\\'"
+  :config
+  (add-hook 'purescript-mode-hook 'turn-on-purescript-indentation))
 #+END_SRC
 ** Nix
 #+BEGIN_SRC emacs-lisp :comments nil
