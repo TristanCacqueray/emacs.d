@@ -1003,6 +1003,11 @@ Replace evil search function "/" by swiper
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh t))
 #+END_SRC
 
+** sbuffer: Like ibuffer, but using magit-section
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package sbuffer
+  :after magit)
+#+END_SRC
 ** Project Management
 #+BEGIN_SRC emacs-lisp
 (use-package projectile

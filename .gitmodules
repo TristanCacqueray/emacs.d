@@ -222,6 +222,9 @@
 [submodule "s"]
 	path = lib/s
 	url = https://github.com/magnars/s.el.git
+[submodule "sbuffer"]
+	path = lib/sbuffer
+	url = https://github.com/alphapapa/sbuffer.el
 [submodule "scheme-complete"]
 	path = lib/scheme-complete
 	url = https://github.com/ashinn/scheme-complete.git
