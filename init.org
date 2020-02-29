@@ -843,6 +843,7 @@ These are minor modes to selectively hide/show code and comment blocks
   ;;(setq company-idle-delay 0.1)
   ;;(setq company-tooltip-limit 10)
   ;;(setq company-minimum-prefix-length 2)
+  (global-set-key (kbd "C-SPC") 'company-complete)
   (global-company-mode 1)
 
   (use-package company-quickhelp
@@ -2278,7 +2279,13 @@ Linting
 (use-package purescript-mode
   :mode "\\.purs\\'"
   :config
-  (add-hook 'purescript-mode-hook 'turn-on-purescript-indentation))
+  (add-hook 'purescript-mode-hook
+    (lambda ()
+      (psc-ide-mode)
+      (company-mode)
+      (flycheck-mode)
+      (turn-on-purescript-unicode-input-method)
+      (turn-on-purescript-indentation))))
 #+END_SRC
 ** Nix
 #+BEGIN_SRC emacs-lisp :comments nil
