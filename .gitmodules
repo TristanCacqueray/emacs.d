@@ -56,6 +56,9 @@
 [submodule "dired-hacks"]
 	path = lib/dired-hacks
 	url = https://github.com/Fuco1/dired-hacks.git
+[submodule "direnv"]
+	path = lib/direnv
+	url = https://github.com/wbolster/emacs-direnv.git
 [submodule "elisp-refs"]
 	path = lib/elisp-refs
 	url = https://github.com/Wilfred/elisp-refs.git

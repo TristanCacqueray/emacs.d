@@ -1035,6 +1035,16 @@ Replace evil search function "/" by swiper
   (projectile-mode))
 #+END_SRC
 
+Also use direnv to customize per project environment
+(From https://www.adelbertc.com/posts/2020-01-06-emacs-rls-nix.html):
+#+BEGIN_SRC emacs-lisp
+(use-package direnv
+  :init
+  (add-hook 'prog-mode-hook #'direnv-update-environment)
+  :config
+  (direnv-mode))
+#+END_SRC
+
 ** Dired
 #+BEGIN_SRC emacs-lisp
 (use-package dired
