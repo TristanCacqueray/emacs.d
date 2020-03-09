@@ -843,7 +843,7 @@ These are minor modes to selectively hide/show code and comment blocks
   ;;(setq company-idle-delay 0.1)
   ;;(setq company-tooltip-limit 10)
   ;;(setq company-minimum-prefix-length 2)
-  (global-set-key (kbd "C-SPC") 'company-complete)
+  (global-set-key (kbd "M-SPC") 'company-complete)
   (global-company-mode 1)
 
   (use-package company-quickhelp
