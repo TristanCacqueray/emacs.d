@@ -2286,6 +2286,7 @@ Linting
       (flycheck-mode)
       (turn-on-purescript-unicode-input-method)
       (turn-on-purescript-indentation))))
+(use-package psci)
 #+END_SRC
 ** Nix
 #+BEGIN_SRC emacs-lisp :comments nil

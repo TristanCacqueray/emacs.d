@@ -198,6 +198,9 @@
 [submodule "psc-ide"]
 	path = lib/psc-ide
 	url = https://github.com/purescript-emacs/psc-ide-emacs.git
+[submodule "psci"]
+	path = lib/psci
+	url = https://github.com/purescript-emacs/emacs-psci.git
 [submodule "purescript-mode"]
 	path = lib/purescript-mode
 	url = https://github.com/purescript-emacs/purescript-mode.git
