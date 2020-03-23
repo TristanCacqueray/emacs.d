@@ -1736,6 +1736,10 @@ def process(msg):
         if gh_sender in bots:
             # Mark CI results as read
             tags.add("-unread")
+    elif msg.get_header("X-GitLab-Project"):
+        tags.add("code")
+        tags.add("-list")
+        tags.add("-to-me")
     # bug reports
     elif (msg.get_header("X-Launchpad-Bug") or
           "@bugs.launchpad.net" in mail_from):
