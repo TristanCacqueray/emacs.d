@@ -1765,7 +1765,8 @@ def process(msg):
     # monitoring
     if msg.get_header("X-Cron-Env") or \
        "root@softwarefactory-project.io" in mail_from or \
-       "monit@" in mail_from:
+       "monit@" in mail_from or \
+       "prometheus@" in mail_from:
         tags.add("-to-me")
         tags.add("-list")
         tags.add("monit")
