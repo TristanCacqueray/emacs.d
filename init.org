@@ -1315,6 +1315,12 @@ task done in the past.
   :demand t
   :after (:any org notmuch))
 #+END_SRC
+** Zettel mode
+#+BEGIN_SRC emacs-lisp
+(use-package zettel-mode
+  :config
+  (setq neuron-zettelkasten (expand-file-name "~/git/perso/zettelkasten")))
+#+END_SRC
 
 * Term
 ** Eshell
@@ -2245,7 +2251,7 @@ Linting
   :bind ((:map haskell-mode-map
            ("<f8>" . haskell-navigate-imports)))
   :config
-  (setq haskell-stylish-on-save t)
+  (setq haskell-stylish-on-save nil)
   ;; Copy pasta from http://haskell.github.io/haskell-mode/manual/latest/
   (add-hook 'haskell-mode-hook
           (lambda ()

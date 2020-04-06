@@ -279,3 +279,6 @@
 [submodule "yaml-mode"]
 	path = lib/yaml-mode
 	url = https://github.com/yoshiki/yaml-mode.git
+[submodule "zettel-mode"]
+	path = lib/zettel-mode
+	url = https://github.com/felko/zettel-mode
