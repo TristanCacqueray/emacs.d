@@ -564,13 +564,43 @@ highlighted, which is helpful when working with Lisp code.
   ;; Set to 'first-error to stop scrolling on first error
   (setq compilation-scroll-output t))
 #+END_SRC
+
+** Comint: Interact with programs
 Comint mode is a package that defines a general command-interpreter-in-a-buffer.
 #+BEGIN_SRC emacs-lisp
-(use-package comint
-  :defer t
-  :config
-  ;; Increase comint buffer size.
-  (setq comint-buffer-maximum-size 8192))
+  ;; https://oleksandrmanzyuk.wordpress.com/2011/10/23/a-persistent-command-history-in-emacs/
+  ;; this implementation use buffer-name instead of process name, so that different shell history doesn't minx
+  ;; todo: investigate using projectile info to further group history?
+  (defun turn-on-comint-history ()
+    (let ((process (get-buffer-process (current-buffer))))
+      (when process
+        (setq comint-input-ring-file-name
+              (expand-file-name (format "~/.emacs.d/inferior-%s-history"
+                      (replace-regexp-in-string "[*/]" "-" (buffer-name (current-buffer))))))
+        (message "buffer history will be:" comint-input-ring-file-name)
+        (comint-read-input-ring)
+        (set-process-sentinel process #'comint-write-history-on-exit))))
+  (defun comint-write-history-on-exit (process event)
+    (comint-write-input-ring)
+    (let ((buf (process-buffer process)))
+      (when (buffer-live-p buf)
+        (with-current-buffer buf
+          (insert (format "\nProcess %s %s" process event))))))
+  (use-package comint
+    :defer t
+    :config
+    (defun mapc-buffers (fn)
+      (mapc (lambda (buffer)
+              (with-current-buffer buffer
+                (funcall fn)))
+            (buffer-list)))
+
+    (defun comint-write-input-ring-all-buffers ()
+      (mapc-buffers 'comint-write-input-ring))
+
+    (add-hook 'kill-emacs-hook 'comint-write-input-ring-all-buffers)
+    ;; Increase comint buffer size.
+    (setq comint-buffer-maximum-size 32768))
 #+END_SRC
 
 ** Subword: CamelCase aware editing operations
@@ -1323,6 +1353,12 @@ task done in the past.
 #+END_SRC
 
 * Term
+** Shell
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package shell
+  :config
+  (add-hook 'shell-mode-hook 'turn-on-comint-history))
+#+END_SRC
 ** Eshell
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package eshell
@@ -2266,6 +2302,7 @@ Linting
   (require 'haskell-interactive-mode)
   (require 'haskell-process)
   (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+  (add-hook 'inferior-haskell-mode-hook 'turn-on-comint-history)
   (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
   (define-key haskell-mode-map (kbd "C-`") 'haskell-interactive-bring)
   (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
@@ -2358,6 +2395,7 @@ Linting
   :mode (("\\.py\\'" . python-mode))
   :interpreter ("python3" . python-mode)
   :init
+  (add-hook 'inferior-python-mode-hook 'turn-on-comint-history)
   (setq
     flycheck-python-pycompile-executable "python3"
     python-shell-interpreter "python3"
