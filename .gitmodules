@@ -306,3 +306,6 @@
 [submodule "zettel-mode"]
 	path = lib/zettel-mode
 	url = https://github.com/felko/zettel-mode
+[submodule "lib/unison-mode"]
+	path = lib/unison-mode
+	url = https://github.com/dariooddenino/unison-mode-emacs
