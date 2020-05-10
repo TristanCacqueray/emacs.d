@@ -31,6 +31,9 @@
 [submodule "company-glsl"]
 	path = lib/company-glsl
 	url = https://github.com/guidoschmidt/company-glsl.git
+[submodule "company-lsp"]
+	path = lib/company-lsp
+	url = https://github.com/tigersoldier/company-lsp.git
 [submodule "company-quickhelp"]
 	path = lib/company-quickhelp
 	url = https://github.com/expez/company-quickhelp.git
@@ -120,9 +123,15 @@
 [submodule "hl-todo"]
 	path = lib/hl-todo
 	url = https://github.com/tarsius/hl-todo.git
+[submodule "ht"]
+	path = lib/ht
+	url = https://github.com/Wilfred/ht.el.git
 [submodule "hy-mode"]
 	path = lib/hy-mode
 	url = https://github.com/hylang/hy-mode.git
+[submodule "hydra"]
+	path = lib/hydra
+	url = https://github.com/abo-abo/hydra.git
 [submodule "ivy"]
 	path = lib/ivy
 	url = https://github.com/abo-abo/swiper.git
@@ -135,9 +144,21 @@
 [submodule "keyfreq"]
 	path = lib/keyfreq
 	url = https://github.com/dacap/keyfreq.git
+[submodule "lib/unison-mode"]
+	path = lib/unison-mode
+	url = https://github.com/dariooddenino/unison-mode-emacs
 [submodule "loop"]
 	path = lib/loop
 	url = https://github.com/Wilfred/loop.el.git
+[submodule "lsp-haskell"]
+	path = lib/lsp-haskell
+	url = https://github.com/emacs-lsp/lsp-haskell.git
+[submodule "lsp-mode"]
+	path = lib/lsp-mode
+	url = https://github.com/emacs-lsp/lsp-mode.git
+[submodule "lsp-ui"]
+	path = lib/lsp-ui
+	url = https://github.com/emacs-lsp/lsp-ui.git
 [submodule "lua-mode"]
 	path = lib/lua-mode
 	url = https://github.com/immerrr/lua-mode.git
@@ -252,6 +273,9 @@
 [submodule "solarized-theme"]
 	path = lib/solarized-theme
 	url = https://github.com/bbatsov/solarized-emacs.git
+[submodule "spinner"]
+	path = lib/spinner
+	url = https://github.com/Malabarba/spinner.el.git
 [submodule "transient"]
 	path = lib/transient
 	url = https://github.com/magit/transient.git

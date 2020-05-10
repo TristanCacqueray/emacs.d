@@ -2277,6 +2277,23 @@ Linting
 ))
 #+END_SRC
 
+** LSP
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package lsp)
+;; lsp-ui shows type annotations on hover
+(use-package lsp-ui
+  :hook ((lsp-mode-hook . lsp-ui-mode)))
+
+;; company-lsp simplifies completion-at-point
+(use-package company-lsp
+  :after company
+  :init
+    (push 'company-lsp company-backends))
+#+END_SRC
+** Unison
+#+BEGIN_SRC emacs-lisp
+;; (use-package unison-mode)
+#+END_SRC
 ** OCaml
 #+BEGIN_SRC emacs-lisp
 (use-package tuareg)
@@ -2310,6 +2327,9 @@ Linting
   (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
   (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
   (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal))
+(use-package lsp-haskell
+  :config
+  (add-hook 'haskell-mode-hook #'lsp))
 #+END_SRC
 ** Dhall
 #+BEGIN_SRC emacs-lisp :comments nil
