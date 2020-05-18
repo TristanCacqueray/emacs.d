@@ -195,6 +195,9 @@
 [submodule "org-bullets"]
 	path = lib/org-bullets
 	url = https://github.com/emacsorphanage/org-bullets.git
+[submodule "ormolu"]
+	path = lib/ormolu
+	url = https://github.com/vyorkin/ormolu.el.git
 [submodule "ox-gfm"]
 	path = lib/ox-gfm
 	url = https://github.com/TristanCacqueray/ox-gfm.git
