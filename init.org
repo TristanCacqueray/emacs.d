@@ -2279,13 +2279,16 @@ Linting
 
 ** LSP
 #+BEGIN_SRC emacs-lisp :comments nil
-(use-package lsp)
+(use-package lsp
+  :disabled t)
 ;; lsp-ui shows type annotations on hover
 (use-package lsp-ui
+  :disabled t
   :hook ((lsp-mode-hook . lsp-ui-mode)))
 
 ;; company-lsp simplifies completion-at-point
 (use-package company-lsp
+  :disabled t
   :after company
   :init
     (push 'company-lsp company-backends))
@@ -2328,6 +2331,7 @@ Linting
   (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
   (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal))
 (use-package lsp-haskell
+  :disabled t
   :config
   (add-hook 'haskell-mode-hook #'lsp))
 #+END_SRC
