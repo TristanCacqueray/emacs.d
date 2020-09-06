@@ -7,15 +7,13 @@
 * About
 This is my current configuration for Emacs. I have been using both Vim
 and Emacs for a long time... Vim used to be better because it is light
-and fast, but this is no longer relevant for me. I prefer Emacs because:
-- Evil binding enables keeping Vim muscle memory,
-- Magit provides an efficient git workflow, and
-- Org-mode is great for getting things done.
+and fast, but this is no longer relevant for me. I prefer Emacs because
+magit provides an efficient git workflow.
 
 For the best experience, I would recommend to build an Emacs configuration
 one option at a time and avoid distribution such as Spacemacs.
 
-: This configuration is vastly inspired by [[https://github.com/dakra/dmacs][dmacs]] and the [[https://github.com/caisah/emacs.dz][emacs.dz awesome list]].
+This configuration is vastly inspired by [[https://github.com/dakra/dmacs][dmacs]] and the [[https://github.com/caisah/emacs.dz][emacs.dz awesome list]].
 Also from [[https://git.sr.ht/~zge/emacs.d]]
 
 ** Installation
@@ -100,11 +98,6 @@ scratch buffer by default
    inhibit-startup-echo-area-message t
    initial-buffer-choice t
    initial-scratch-message nil)
-#+END_SRC
-
-Toggle fullscreen by default
-#+BEGIN_SRC emacs-lisp
-(toggle-frame-maximized)
 #+END_SRC
 
 Ensure latest version of a file is loaded
@@ -373,11 +366,13 @@ Enable some global mode (TODO: move this to another section?)
 (line-number-mode 1)
 (column-number-mode 1)
 
-;; Highlight the current line
-(global-hl-line-mode 1)
+(if (display-graphic-p)
+  (progn
+  ;; Highlight the current line
+  (global-hl-line-mode 1)
 
-;; Highlight stuff
-(global-hi-lock-mode 1)
+  ;; Highlight stuff
+  (global-hi-lock-mode 1)))
 
 ;; Replace some name with pretty symbols like lambda
 (global-prettify-symbols-mode t)
@@ -1184,6 +1179,13 @@ Workflow is vastly inspired by http://doc.norang.ca/org-mode.html
         ;; Mail link description format, %c if from or to when sent by me
         org-email-link-description-format "Email %c (%d): %s"
         )
+
+        ;; Enable windmove-default-keybindings in org-mode
+        (add-hook 'org-shiftup-final-hook 'windmove-up)
+        (add-hook 'org-shiftleft-final-hook 'windmove-left)
+        (add-hook 'org-shiftdown-final-hook 'windmove-down)
+        (add-hook 'org-shiftright-final-hook 'windmove-right)
+
 
       ;; Custom links
       ;; http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
