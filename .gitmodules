@@ -96,6 +96,9 @@
 [submodule "flymake"]
 	path = lib/flymake
 	url = https://github.com/emacsmirror/flymake.git
+[submodule "format-all"]
+	path = lib/format-all
+	url = https://github.com/lassik/emacs-format-all-the-code.git
 [submodule "ghub"]
 	path = lib/ghub
 	url = https://github.com/magit/ghub.git
@@ -147,6 +150,9 @@
 [submodule "keyfreq"]
 	path = lib/keyfreq
 	url = https://github.com/dacap/keyfreq.git
+[submodule "language-id"]
+	path = lib/language-id
+	url = https://github.com/lassik/emacs-language-id.git
 [submodule "loop"]
 	path = lib/loop
 	url = https://github.com/Wilfred/loop.el.git

@@ -2262,6 +2262,11 @@ I use notmuch-hello mode to browse, manage and compose mails:
 Sometimes it's not obvious if you're at the top or bottom of a
 buffer. So these indicators tell precisely that.
 
+*** format-all: format code
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package format-all)
+#+END_SRC
+
 *** Flycheck
 Linting
 #+BEGIN_SRC emacs-lisp :comments nil
