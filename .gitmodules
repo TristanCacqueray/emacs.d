@@ -165,9 +165,6 @@
 [submodule "lsp-ui"]
 	path = lib/lsp-ui
 	url = https://github.com/emacs-lsp/lsp-ui.git
-[submodule "lua-mode"]
-	path = lib/lua-mode
-	url = https://github.com/immerrr/lua-mode.git
 [submodule "magit"]
 	path = lib/magit
 	url = https://github.com/magit/magit.git
