@@ -919,6 +919,13 @@ TODO: write a script to show daily/weekly/monthly stats.
   (global-anzu-mode +1))
 #+END_SRC
 
+*** perspective: workspace
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package perspective
+  :config
+  (persp-mode))
+#+END_SRC
+
 ** Evil: vim mode and bindings
 #+BEGIN_SRC emacs-lisp :comments nil
   (use-package evil

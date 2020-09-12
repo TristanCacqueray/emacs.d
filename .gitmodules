@@ -216,6 +216,9 @@
 [submodule "packed"]
 	path = lib/packed
 	url = https://github.com/emacscollective/packed.git
+[submodule "perspective"]
+	path = lib/perspective
+	url = https://github.com/nex3/perspective-el.git
 [submodule "pg"]
 	path = lib/pg
 	url = https://github.com/cbbrowne/pg.el.git
