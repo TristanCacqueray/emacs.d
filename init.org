@@ -925,6 +925,12 @@ TODO: write a script to show daily/weekly/monthly stats.
   :config
   (persp-mode))
 #+END_SRC
+*** yasnippet: template system
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package yasnippet
+  :config
+  (yas-global-mode 1))
+#+END_SRC
 
 ** Evil: vim mode and bindings
 #+BEGIN_SRC emacs-lisp :comments nil

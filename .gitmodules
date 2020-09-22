@@ -108,6 +108,9 @@
 [submodule "glsl-mode"]
 	path = lib/glsl-mode
 	url = https://github.com/jimhourihan/glsl-mode.git
+[submodule "gnugo"]
+	path = lib/gnugo
+	url = https://github.com/emacsmirror/gnugo.git
 [submodule "go-mode"]
 	path = lib/go-mode
 	url = https://github.com/dominikh/go-mode.el.git
@@ -312,6 +315,9 @@
 [submodule "yaml-mode"]
 	path = lib/yaml-mode
 	url = https://github.com/yoshiki/yaml-mode.git
+[submodule "yasnippet"]
+	path = lib/yasnippet
+	url = https://github.com/joaotavora/yasnippet.git
 [submodule "zettel-mode"]
 	path = lib/zettel-mode
 	url = https://github.com/felko/zettel-mode
