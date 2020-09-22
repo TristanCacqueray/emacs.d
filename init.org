@@ -2379,6 +2379,7 @@ Linting
   :config
   (add-hook 'purescript-mode-hook
     (lambda ()
+      (format-all-mode)
       (psc-ide-mode)
       (company-mode)
       (flycheck-mode)
