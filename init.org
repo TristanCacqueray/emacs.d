@@ -2327,6 +2327,7 @@ Linting
   :bind ((:map haskell-mode-map
            ("<f8>" . haskell-navigate-imports)))
   :config
+  (setq ormolu-format-on-save-mode t)
   (setq haskell-stylish-on-save nil)
   (setq haskell-process-type 'stack-ghci)
   ;; Copy pasta from http://haskell.github.io/haskell-mode/manual/latest/
