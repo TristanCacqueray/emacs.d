@@ -249,6 +249,9 @@
 [submodule "rainbow-mode"]
 	path = lib/rainbow-mode
 	url = https://github.com/emacsmirror/rainbow-mode.git
+[submodule "reason-mode"]
+	path = lib/reason-mode
+	url = https://github.com/reasonml-editor/reason-mode.git
 [submodule "reformatter"]
 	path = lib/reformatter
 	url = https://github.com/purcell/reformatter.el.git
