@@ -65,6 +65,9 @@
 [submodule "elisp-refs"]
 	path = lib/elisp-refs
 	url = https://github.com/Wilfred/elisp-refs.git
+[submodule "elm-mode"]
+	path = lib/elm-mode
+	url = https://github.com/jcollard/elm-mode.git
 [submodule "emacsql"]
 	path = lib/emacsql
 	url = https://github.com/skeeto/emacsql.git

@@ -2387,6 +2387,15 @@ Linting
       (turn-on-purescript-indentation))))
 (use-package psci)
 #+END_SRC
+** Elm
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package elm-mode
+  :config
+  (add-hook 'elm-mode-hook
+    (lambda ()
+      (format-all-mode)
+    )))
+#+END_SRC
 ** Nix
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package nix-mode
