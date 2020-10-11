@@ -300,6 +300,9 @@
 [submodule "tuareg"]
 	path = lib/tuareg
 	url = https://github.com/ocaml/tuareg.git
+[submodule "typescript-mode"]
+	path = lib/typescript-mode
+	url = https://github.com/emacs-typescript/typescript.el.git
 [submodule "undo-tree"]
 	path = lib/undo-tree
 	url = https://github.com/emacsorphanage/undo-tree.git

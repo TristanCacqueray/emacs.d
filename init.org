@@ -2407,6 +2407,10 @@ Linting
       (format-all-mode)
     )))
 #+END_SRC
+** Typescript
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package typescript-mode)
+#+END_SRC
 ** Nix
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package nix-mode
