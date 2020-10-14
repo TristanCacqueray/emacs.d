@@ -169,9 +169,6 @@ The use-package macro allows you to isolate package configuration in your
 
   ;; For the :bind keyword
   (use-package bind-key)
-
-  ;; For the :diminish keyword, to replace mode names in modeline
-  (use-package diminish)
 #+END_SRC
 
 *** Epkg
@@ -638,57 +635,6 @@ Comint mode is a package that defines a general command-interpreter-in-a-buffer.
 #+END_SRC
 
 * Editor extra packages
-** God-mode: simulate vim mode by prefixing any key by Control
-This mode enable navigation without using the Control key
-#+BEGIN_SRC emacs-lisp
-  (use-package god-mode
-    ;; disable for now because of bad interaction with magit
-    :disabled t
-    :init
-    (defun update-cursor ()
-      (setq cursor-type (if (or god-local-mode buffer-read-only)
-                            'bar
-                          'box)))
-    (add-hook 'god-mode-enabled-hook 'update-cursor)
-    (add-hook 'god-mode-disabled-hook 'update-cursor)
-    :config
-    (global-set-key (kbd "<escape>") 'god-mode-all)
-    ;;(setq god-exempt-major-modes nil)
-    ;;(setq god-exempt-predicates nil)
-    ;;(bind-keys :map launcher-map
-    ;;           ("g" . god-local-mode))
-    (bind-keys :map god-local-mode-map
-              ;; ("z" . repeat)
-              ;; ("." . repeat)
-               ("i" . god-local-mode))
-    ;;(add-to-list 'god-exempt-major-modes 'org-agenda-mode)
-    (add-to-list 'god-exempt-major-modes 'notmuch-hello)
-    (add-to-list 'god-exempt-major-modes 'notmuch-show)
-    (add-to-list 'god-exempt-major-modes 'notmuch-search)
-    (add-to-list 'god-exempt-major-modes 'magit-status)
-
-    ;; Navigate window layout using zp zn zb zf
-    (global-unset-key (kbd "C-z"))
-    (global-set-key (kbd "C-z C-p") 'windmove-up)
-    (global-set-key (kbd "C-z C-n") 'windmove-down)
-    (global-set-key (kbd "C-z C-b") 'windmove-left)
-    (global-set-key (kbd "C-z C-f") 'windmove-right)
-
-    ;; Split screen using x1 x2...
-    ;;(global-set-key (kbd "C-x C-1") 'delete-other-windows)
-    ;;(global-set-key (kbd "C-x C-2") 'split-window-below)
-    ;;(global-set-key (kbd "C-x C-3") 'split-window-right)
-    ;;(global-set-key (kbd "C-x C-0") 'delete-window)
-    ;;(global-set-key (kbd "C-x C-g") 'magit-status)
-    ;;(global-set-key (kbd "C-x C-k") 'kill-this-buffer)
-    ;;(global-set-key (kbd "C-x C-o") 'other-window)
-    )
-  (use-package god-mode-isearch
-    :config
-    (define-key isearch-mode-map (kbd "<escape>") 'god-mode-isearch-activate)
-    (define-key god-mode-isearch-map (kbd "<escape>") 'god-mode-isearch-disable))
-#+END_SRC
-
 ** UI
 *** Nyan cat: Buffer position with a cat
 #+BEGIN_SRC emacs-lisp
@@ -703,33 +649,6 @@ This mode enable navigation without using the Control key
   :hook (prog-mode . eldoc-mode)
   :config
   (global-eldoc-mode))
-#+END_SRC
-
-*** Hl-todo: Highlight and navigate TODO keywords
-#+BEGIN_SRC emacs-lisp
-(use-package hl-todo
-  :disabled t
-  :defer 2
-  :config (global-hl-todo-mode))
-#+END_SRC
-
-*** Volatile highlights: visual feedback on some operations like yank,kill,undo
-#+BEGIN_SRC emacs-lisp
-(use-package volatile-highlights
-  :disabled t
-  :defer 10
-  :config (volatile-highlights-mode t))
-#+END_SRC
-
-*** beacon: Highlight current line/cursor when switching frames
-#+BEGIN_SRC emacs-lisp
-(use-package beacon
-  :defer 5
-  :diminish
-  :config
-  ;; don't blink in notmuch-search, it's both slow and ugly
-  (add-to-list 'beacon-dont-blink-major-modes #'notmuch-search-mode)
-  (beacon-mode 1))
 #+END_SRC
 
 *** which-key: Display available keybindings in popup
@@ -771,14 +690,6 @@ different face
 )
 #+END_SRC
 
-*** Highlight indentions
-#+BEGIN_SRC emacs-lisp
-(use-package highlight-indent-guides
-  :diminish
-  :disabled t
-  :hook ((sass-mode yaml-mode) . highlight-indent-guides-mode))
-#+END_SRC
-
 *** Highlight trailing whitespaces and tabs
 #+BEGIN_SRC emacs-lisp
 (use-package whitespace
@@ -812,15 +723,6 @@ different face
   (global-undo-tree-mode))
 #+END_SRC
 
-*** Automatically remove trailing whitespace (only if I put them there)
-TODO pick this or the delete-trailing-whitespace save-hook
-#+BEGIN_SRC emacs-lisp
-(use-package ws-butler
-  :diminish
-  :hook ((text-mode prog-mode) . ws-butler-mode)
-  :config (setq ws-butler-keep-whitespace-before-point nil))
-#+END_SRC
-
 *** Simple clip: manually manage clipboard
 Use C-<insert> and Shift-<insert> to copy and paste the clipboard.
 Use mouse and middle-mouse to copy and paste the primary clipboard.
@@ -828,27 +730,6 @@ Use mouse and middle-mouse to copy and paste the primary clipboard.
 (use-package simpleclip
   :config
   (simpleclip-mode 1))
-#+END_SRC
-
-*** Cycle outline and code visibility
-These are minor modes to selectively hide/show code and comment blocks
-#+BEGIN_SRC emacs-lisp
-(use-package hideshow
-  :diminish
-  :disabled t
-  :hook (prog-mode  . hs-minor-mode))
-
-(use-package outline
-  :diminish
-  :hook ((prog-mode message-mode markdown-mode) . outline-minor-mode))
-
-(use-package bicycle
-  :diminish
-  :disabled t
-  :after outline
-  :bind (:map outline-minor-mode-map
-         ([C-tab] . bicycle-cycle)
-         ([backtab] . bicycle-cycle-global)))
 #+END_SRC
 
 *** Smartparens: smarter parenthesis mode
@@ -869,24 +750,10 @@ These are minor modes to selectively hide/show code and comment blocks
   ;;(setq company-tooltip-limit 10)
   ;;(setq company-minimum-prefix-length 2)
   (global-set-key (kbd "M-SPC") 'company-complete)
-  (global-company-mode 1)
-
-  (use-package company-quickhelp
-    :config (company-quickhelp-mode 1)))
-
+  (global-company-mode 1))
 ;;(use-package all-the-icons)
 ;;(use-package company-box
 ;;  :hook (company-mode . company-box-mode))
-#+END_SRC
-
-*** Helpful: A better help buffer
-Helpful is a replacement for ~*help*~ buffers that provides much more contextual information.
-#+BEGIN_SRC emacs-lisp
-(use-package helpful
-  :bind (("C-h f" . helpful-function)
-         ("C-h v" . helpful-variable)
-         ("C-h s" . helpful-symbol)
-         ("C-h k" . helpful-key)))
 #+END_SRC
 
 *** keyfreq: record command frequencies
@@ -919,43 +786,11 @@ TODO: write a script to show daily/weekly/monthly stats.
   (global-anzu-mode +1))
 #+END_SRC
 
-*** perspective: workspace
-#+BEGIN_SRC emacs-lisp :comments nil
-(use-package perspective
-  :config
-  (persp-mode))
-#+END_SRC
 *** yasnippet: template system
 #+BEGIN_SRC emacs-lisp :comments nil
 (use-package yasnippet
   :config
   (yas-global-mode 1))
-#+END_SRC
-
-** Evil: vim mode and bindings
-#+BEGIN_SRC emacs-lisp :comments nil
-  (use-package evil
-    :disabled t
-    :init
-    ;; (setq evil-want-integration t)
-    ;; (setq evil-want-keybinding nil)
-    :hook (after-init . evil-mode)
-    :config
-    (progn
-      ;; stop messing with clipboard please
-      (evil-define-operator evil-destroy (beg end type register yank-handler)
-        (evil-delete beg end type ?_ yank-handler))
-      (evil-define-operator evil-destroy-replace (beg end type register yank-handler)
-        (evil-destroy beg end type register yank-handler)
-        (evil-paste-before 1 register))
-
-      ;; Make evil undo only one char at a time
-      (advice-add 'undo-auto--last-boundary-amalgamating-number
-                  :override #'ignore)
-      (setq evil-want-fine-undo t)
-
-      ;; TODO: check what is this :)
-      (add-hook 'with-editor-mode-hook 'evil-insert-state)))
 #+END_SRC
 
 ** Ivy
@@ -1097,38 +932,8 @@ Also use direnv to customize per project environment
   (setq dired-recursive-deletes 'always)
   (setq dired-recursive-copies 'always)
 )
-(use-package dired-rainbow
-  :after dired
-  :config
-  (dired-rainbow-define html "#4e9a06" ("htm" "html" "xhtml"))
-  (dired-rainbow-define xml "#b4fa70" ("xml" "xsd" "xsl" "xslt" "wsdl"))
-
-  (dired-rainbow-define document font-lock-function-name-face ("doc" "docx" "odt" "pdb" "pdf" "ps" "rtf" "djvu" "epub"))
-  (dired-rainbow-define excel "#3465a4" ("xlsx"))
-  ;; FIXME: my-dired-media-files-extensions not defined?
-  ;;(dired-rainbow-define media "#ce5c00" my-dired-media-files-extensions)
-  (dired-rainbow-define image "#ff4b4b" ("jpg" "png" "jpeg" "gif"))
-
-  (dired-rainbow-define log "#c17d11" ("log"))
-  (dired-rainbow-define sourcefile "#fcaf3e" ("py" "c" "cc" "cpp" "h" "java" "pl" "rb" "R"
-                                              "php" "go" "rust" "js" "ts" "hs"))
-
-  (dired-rainbow-define executable "#8cc4ff" ("exe" "msi"))
-  (dired-rainbow-define compressed "#ad7fa8" ("zip" "bz2" "tgz" "txz" "gz" "xz" "z" "Z" "jar"
-                                              "war" "ear" "rar" "sar" "xpi" "apk" "xz" "tar"))
-  (dired-rainbow-define packaged "#e6a8df" ("deb" "rpm"))
-  (dired-rainbow-define encrypted "LightBlue" ("gpg" "pgp"))
-
-  (dired-rainbow-define-chmod executable-unix "Green" "-.*x.*"))
-
 #+END_SRC
 
-** Nov: epub reader
-#+BEGIN_SRC emacs-lisp :comments nil
-(use-package nov-mode
-  :defer t
-  :mode "\\.epub\\'")
-#+END_SRC
 * Org mode
 ** General Setup
 Workflow is vastly inspired by http://doc.norang.ca/org-mode.html
@@ -1311,19 +1116,6 @@ Workflow is vastly inspired by http://doc.norang.ca/org-mode.html
     org-export-with-sub-superscripts nil
   )
 )
-;; Github markdown
-(use-package ox-gfm
-  :after ox)
-
-;; reStructuredText
-(use-package ox-rst
-  :after ox)
-
-;; Hugo blog posts
-(use-package ox-hugo
-  :after ox)
-(use-package ox-hugo-auto-export
-  :after ox-hugo)
 #+END_SRC
 *** Set a dark background for source blocks
 #+BEGIN_SRC emacs-lisp
@@ -1359,12 +1151,6 @@ task done in the past.
 (use-package ol-notmuch
   :demand t
   :after (:any org notmuch))
-#+END_SRC
-** Zettel mode
-#+BEGIN_SRC emacs-lisp
-(use-package zettel-mode
-  :config
-  (setq neuron-zettelkasten (expand-file-name "~/git/perso/zettelkasten")))
 #+END_SRC
 
 * Term
@@ -2297,22 +2083,6 @@ Linting
 ))
 #+END_SRC
 
-** LSP
-#+BEGIN_SRC emacs-lisp :comments nil
-(use-package lsp
-  :disabled t)
-;; lsp-ui shows type annotations on hover
-(use-package lsp-ui
-  :disabled t
-  :hook ((lsp-mode-hook . lsp-ui-mode)))
-
-;; company-lsp simplifies completion-at-point
-(use-package company-lsp
-  :disabled t
-  :after company
-  :init
-    (push 'company-lsp company-backends))
-#+END_SRC
 ** Unison
 #+BEGIN_SRC emacs-lisp
 ;; (use-package unison-mode)
@@ -2447,17 +2217,10 @@ Linting
 #+BEGIN_SRC emacs-lisp
 (use-package glsl-mode
   :mode ("\\.vert\\'" "\\.frag\\'" "\\.glsl\\'" "\\.geom\\'"))
-(use-package company-glsl
-  :after glsl-mode
-  :config (add-to-list 'company-backends 'company-glsl))
 #+END_SRC
 
 ** Python
 #+BEGIN_SRC emacs-lisp
-(use-package cython-mode
-  :mode ("\\.pyd\\'" "\\.pyi\\'" "\\.pyx\\'"))
-(use-package flycheck-cython
-  :after (cython-mode flycheck))
 (use-package flycheck-mypy
   :config
   (add-to-list 'flycheck-disabled-checkers 'python-flake8)

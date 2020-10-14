@@ -7,12 +7,6 @@
 [submodule "auto-compile"]
 	path = lib/auto-compile
 	url = https://github.com/emacscollective/auto-compile.git
-[submodule "beacon"]
-	path = lib/beacon
-	url = https://github.com/Malabarba/beacon.git
-[submodule "bicycle"]
-	path = lib/bicycle
-	url = https://github.com/tarsius/bicycle.git
 [submodule "borg"]
 	path = lib/borg
 	url = https://github.com/emacscollective/borg.git
@@ -25,21 +19,6 @@
 [submodule "company"]
 	path = lib/company
 	url = https://github.com/company-mode/company-mode.git
-[submodule "company-box"]
-	path = lib/company-box
-	url = https://github.com/sebastiencs/company-box.git
-[submodule "company-glsl"]
-	path = lib/company-glsl
-	url = https://github.com/guidoschmidt/company-glsl.git
-[submodule "company-lsp"]
-	path = lib/company-lsp
-	url = https://github.com/tigersoldier/company-lsp.git
-[submodule "company-quickhelp"]
-	path = lib/company-quickhelp
-	url = https://github.com/expez/company-quickhelp.git
-[submodule "counsel-projectile"]
-	path = lib/counsel-projectile
-	url = https://github.com/ericdanan/counsel-projectile.git
 [submodule "dash"]
 	path = lib/dash
 	url = https://github.com/magnars/dash.el.git
@@ -50,21 +29,9 @@
 [submodule "diff-hl"]
 	path = lib/diff-hl
 	url = https://github.com/dgutov/diff-hl.git
-[submodule "diminish"]
-	path = lib/diminish
-	url = https://github.com/myrjola/diminish.el.git
-[submodule "dired-du"]
-	path = lib/dired-du
-	url = https://github.com/emacsmirror/dired-du.git
-[submodule "dired-hacks"]
-	path = lib/dired-hacks
-	url = https://github.com/Fuco1/dired-hacks.git
 [submodule "direnv"]
 	path = lib/direnv
 	url = https://github.com/wbolster/emacs-direnv.git
-[submodule "elisp-refs"]
-	path = lib/elisp-refs
-	url = https://github.com/Wilfred/elisp-refs.git
 [submodule "elm-mode"]
 	path = lib/elm-mode
 	url = https://github.com/jcollard/elm-mode.git
@@ -75,15 +42,6 @@
 [submodule "epkg"]
 	path = lib/epkg
 	url = https://github.com/emacscollective/epkg.git
-[submodule "esxml"]
-	path = lib/esxml
-	url = https://github.com/tali713/esxml.git
-[submodule "evil"]
-	path = lib/evil
-	url = https://github.com/emacs-evil/evil.git
-[submodule "evil-leader"]
-	path = lib/evil-leader
-	url = https://github.com/cofi/evil-leader.git
 [submodule "f"]
 	path = lib/f
 	url = https://github.com/rejeep/f.el.git
@@ -117,33 +75,15 @@
 [submodule "go-mode"]
 	path = lib/go-mode
 	url = https://github.com/dominikh/go-mode.el.git
-[submodule "god-mode"]
-	path = lib/god-mode
-	url = https://github.com/chrisdone/god-mode.git
 [submodule "haskell-mode"]
 	path = lib/haskell-mode
 	url = https://github.com/haskell/haskell-mode.git
-[submodule "helpful"]
-	path = lib/helpful
-	url = https://github.com/Wilfred/helpful.git
-[submodule "highlight-indent-guides"]
-	path = lib/highlight-indent-guides
-	url = https://github.com/DarthFennec/highlight-indent-guides.git
-[submodule "hl-todo"]
-	path = lib/hl-todo
-	url = https://github.com/tarsius/hl-todo.git
 [submodule "hlint-refactor"]
 	path = lib/hlint-refactor
 	url = https://github.com/mpickering/hlint-refactor-mode.git
-[submodule "ht"]
-	path = lib/ht
-	url = https://github.com/Wilfred/ht.el.git
 [submodule "hy-mode"]
 	path = lib/hy-mode
 	url = https://github.com/hylang/hy-mode.git
-[submodule "hydra"]
-	path = lib/hydra
-	url = https://github.com/abo-abo/hydra.git
 [submodule "ivy"]
 	path = lib/ivy
 	url = https://github.com/abo-abo/swiper.git
@@ -159,18 +99,6 @@
 [submodule "language-id"]
 	path = lib/language-id
 	url = https://github.com/lassik/emacs-language-id.git
-[submodule "loop"]
-	path = lib/loop
-	url = https://github.com/Wilfred/loop.el.git
-[submodule "lsp-haskell"]
-	path = lib/lsp-haskell
-	url = https://github.com/emacs-lsp/lsp-haskell.git
-[submodule "lsp-mode"]
-	path = lib/lsp-mode
-	url = https://github.com/emacs-lsp/lsp-mode.git
-[submodule "lsp-ui"]
-	path = lib/lsp-ui
-	url = https://github.com/emacs-lsp/lsp-ui.git
 [submodule "magit"]
 	path = lib/magit
 	url = https://github.com/magit/magit.git
@@ -192,9 +120,6 @@
 	info-path = doc/_build/texinfo
 	build-step = ./configure
 	build-step = make
-[submodule "nov"]
-	path = lib/nov
-	url = https://github.com/wasamasa/nov.el.git
 [submodule "nyan-mode"]
 	path = lib/nyan-mode
 	url = https://github.com/TeMPOraL/nyan-mode.git
@@ -207,21 +132,9 @@
 [submodule "ormolu"]
 	path = lib/ormolu
 	url = https://github.com/vyorkin/ormolu.el.git
-[submodule "ox-gfm"]
-	path = lib/ox-gfm
-	url = https://github.com/TristanCacqueray/ox-gfm.git
-[submodule "ox-hugo"]
-	path = lib/ox-hugo
-	url = https://github.com/kaushalmodi/ox-hugo.git
-[submodule "ox-rst"]
-	path = lib/ox-rst
-	url = https://github.com/msnoigrs/ox-rst.git
 [submodule "packed"]
 	path = lib/packed
 	url = https://github.com/emacscollective/packed.git
-[submodule "perspective"]
-	path = lib/perspective
-	url = https://github.com/nex3/perspective-el.git
 [submodule "pg"]
 	path = lib/pg
 	url = https://github.com/cbbrowne/pg.el.git
@@ -243,9 +156,6 @@
 [submodule "rainbow-delimiters"]
 	path = lib/rainbow-delimiters
 	url = https://github.com/Fanael/rainbow-delimiters.git
-[submodule "rainbow-identifiers"]
-	path = lib/rainbow-identifiers
-	url = https://github.com/Fanael/rainbow-identifiers.git
 [submodule "rainbow-mode"]
 	path = lib/rainbow-mode
 	url = https://github.com/emacsmirror/rainbow-mode.git
@@ -276,9 +186,6 @@
 [submodule "scheme-complete"]
 	path = lib/scheme-complete
 	url = https://github.com/ashinn/scheme-complete.git
-[submodule "shut-up"]
-	path = lib/shut-up
-	url = https://github.com/cask/shut-up.git
 [submodule "simpleclip"]
 	path = lib/simpleclip
 	url = https://github.com/rolandwalker/simpleclip.git
@@ -291,9 +198,6 @@
 [submodule "solarized-theme"]
 	path = lib/solarized-theme
 	url = https://github.com/bbatsov/solarized-emacs.git
-[submodule "spinner"]
-	path = lib/spinner
-	url = https://github.com/Malabarba/spinner.el.git
 [submodule "transient"]
 	path = lib/transient
 	url = https://github.com/magit/transient.git
@@ -309,24 +213,15 @@
 [submodule "use-package"]
 	path = lib/use-package
 	url = https://github.com/jwiegley/use-package.git
-[submodule "volatile-highlights"]
-	path = lib/volatile-highlights
-	url = https://github.com/k-talo/volatile-highlights.el.git
 [submodule "which-key"]
 	path = lib/which-key
 	url = https://github.com/justbur/emacs-which-key.git
 [submodule "with-editor"]
 	path = lib/with-editor
 	url = https://github.com/magit/with-editor.git
-[submodule "ws-butler"]
-	path = lib/ws-butler
-	url = https://github.com/lewang/ws-butler.git
 [submodule "yaml-mode"]
 	path = lib/yaml-mode
 	url = https://github.com/yoshiki/yaml-mode.git
 [submodule "yasnippet"]
 	path = lib/yasnippet
 	url = https://github.com/joaotavora/yasnippet.git
-[submodule "zettel-mode"]
-	path = lib/zettel-mode
-	url = https://github.com/felko/zettel-mode
