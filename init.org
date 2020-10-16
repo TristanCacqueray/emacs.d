@@ -1264,6 +1264,12 @@ From https://www.emacswiki.org/emacs/AnsiTermHints
     (remote-term "cmdev2" "ssh" "kreg@cmdev2.dsa.int"))
 #+END_SRC
 
+** vterm
+#+BEGIN_SRC emacs-lisp :comments nil
+;; (use-package tramp-loaddefs)
+(use-package vterm
+  :defer t)
+#+END_SRC
 ** Tramp
 #+BEGIN_SRC emacs-lisp :comments nil
 ;; (use-package tramp-loaddefs)
