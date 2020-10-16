@@ -1153,6 +1153,13 @@ task done in the past.
   :after (:any org notmuch))
 #+END_SRC
 
+** Zettlekasten
+#+BEGIN_SRC emacs-lisp :comments nil
+(use-package neuron-mode
+  :config
+  ;; Use title name as file name
+  (setq-default neuron-id-format (lambda (a) a)))
+#+END_SRC
 * Term
 ** Shell
 #+BEGIN_SRC emacs-lisp :comments nil
