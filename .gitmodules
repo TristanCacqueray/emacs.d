@@ -29,9 +29,6 @@
 [submodule "diff-hl"]
 	path = lib/diff-hl
 	url = https://github.com/dgutov/diff-hl.git
-[submodule "direnv"]
-	path = lib/direnv
-	url = https://github.com/wbolster/emacs-direnv.git
 [submodule "elm-mode"]
 	path = lib/elm-mode
 	url = https://github.com/jcollard/elm-mode.git
