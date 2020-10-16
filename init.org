@@ -2100,44 +2100,20 @@ Linting
 #+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp :comments nil
-(use-package haskell-mode
-  :bind ((:map haskell-mode-map
-           ("<f8>" . haskell-navigate-imports)))
-  :config
-  (setq ormolu-format-on-save-mode t)
-  (setq haskell-stylish-on-save nil)
-  (setq haskell-process-type 'stack-ghci)
-  ;; Copy pasta from http://haskell.github.io/haskell-mode/manual/latest/
-  (add-hook 'haskell-mode-hook
-          (lambda ()
-            (set (make-local-variable 'company-backends)
-                 (append '((company-capf company-dabbrev-code))
-                         company-backends))))
-  (add-hook 'haskell-mode-hook 'haskell-auto-insert-module-template)
-  (eval-after-load "haskell-mode"
-    '(define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile))
-  (eval-after-load "haskell-cabal"
-    '(define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-compile))
-  (require 'haskell-interactive-mode)
-  (require 'haskell-process)
-  (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
-  (add-hook 'inferior-haskell-mode-hook 'turn-on-comint-history)
-  (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
-  (define-key haskell-mode-map (kbd "C-`") 'haskell-interactive-bring)
-  (define-key haskell-mode-map (kbd "C-c C-t") 'haskell-process-do-type)
-  (define-key haskell-mode-map (kbd "C-c C-i") 'haskell-process-do-info)
-  (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-  (define-key haskell-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
-  (define-key haskell-mode-map (kbd "C-c c") 'haskell-process-cabal))
-(use-package lsp-haskell
-  :disabled t
-  :config
-  (add-hook 'haskell-mode-hook #'lsp))
-(use-package ormolu
-;; :hook (haskell-mode . ormolu-format-on-save-mode)
- :bind
- (:map haskell-mode-map
-   ("C-c r" . ormolu-format-buffer)))
+  (use-package haskell-mode
+    :bind ((:map haskell-mode-map
+             ("<f8>" . haskell-navigate-imports)))
+    :config
+    ;; ensure run-haskell uses the simplest ghci subprocess
+    (setq-default haskell-process-type 'ghci)
+    (setq ormolu-format-on-save-mode t)
+    (add-hook 'haskell-mode-hook 'haskell-auto-insert-module-template))
+
+  (use-package ormolu
+  ;; :hook (haskell-mode . ormolu-format-on-save-mode)
+   :bind
+   (:map haskell-mode-map
+     ("C-c r" . ormolu-format-buffer)))
 #+END_SRC
 ** Dhall
 #+BEGIN_SRC emacs-lisp :comments nil
